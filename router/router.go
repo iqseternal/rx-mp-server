@@ -17,7 +17,8 @@ func InitRouter(router *gin.Engine) {
 
 		context.JSON(http.StatusOK, gin.H{
 			"data": gin.H{
-				"t": date,
+				"t":       date,
+				"message": "hello world",
 			},
 		})
 	})

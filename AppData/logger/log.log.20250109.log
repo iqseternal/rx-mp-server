@@ -1,1 +1,5 @@
 {"client_ip":"127.0.0.1","latency_time":7353300,"level":"info","msg":"","req_method":"POST","req_uri":"/","status_code":200,"time":"2025-01-09 15:01:25"}
+{"client_ip":"127.0.0.1","latency_time":18293900,"level":"info","msg":"","req_method":"GET","req_uri":"/","status_code":200,"time":"2025-01-09 18:54:06"}
+{"client_ip":"127.0.0.1","latency_time":0,"level":"info","msg":"","req_method":"GET","req_uri":"/","status_code":200,"time":"2025-01-09 18:54:48"}
+{"client_ip":"127.0.0.1","latency_time":0,"level":"info","msg":"","req_method":"GET","req_uri":"/","status_code":200,"time":"2025-01-09 18:54:54"}
+{"client_ip":"127.0.0.1","latency_time":3879900,"level":"info","msg":"","req_method":"GET","req_uri":"/","status_code":200,"time":"2025-01-09 19:52:07"}
