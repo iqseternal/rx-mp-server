@@ -1,0 +1,8 @@
+linters:
+  disable-all: true  # 关闭其他linter
+linters-settings:
+  govet:            # 对于linter govet，这里手动开启了它的某些扫描规则
+    check-shadowing: false
+    check-unreachable: false
+    check-rangeloops: false
+    check-copylocks: false
