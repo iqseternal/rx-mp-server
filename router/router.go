@@ -2,26 +2,20 @@ package router
 
 import (
 	"demo/handlers"
+	"demo/libs/r"
 	"demo/middleware"
-	"net/http"
-	"time"
-
 	"github.com/gin-gonic/gin"
 )
 
 func InitRouter(router *gin.Engine) {
-	router.Use(middleware.LoggerToFile())
+	router.Use(middleware.LoggerToFile(), middleware.Cors())
 
-	router.Any("/", func(context *gin.Context) {
-		date := time.Now().Format("2006/01/02 15:04:05")
+	api := router.Group("/")
+	//api.Use(middleware.JwtGuard())
 
-		context.JSON(http.StatusOK, gin.H{
-			"data": gin.H{
-				"t":       date,
-				"message": "hello world",
-			},
-		})
-	})
+	api.POST("/login", r.WrapHandler(handlers.Login))
 
-	router.POST("/login", handlers.Login)
+	router.GET("/", r.WrapHandler(func(c *r.Context) {
+		c.Ok(&r.R{})
+	}))
 }

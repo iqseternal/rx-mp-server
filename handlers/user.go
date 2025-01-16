@@ -1,16 +1,27 @@
 package handlers
 
 import (
-	"demo/common"
-	"github.com/gin-gonic/gin"
+	"demo/libs/r"
 )
 
-func Login(context *gin.Context) {
+type User struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
 
-	common.Logger.Info("这个事情不太妙啊")
+func Login(c *r.Context) {
+	var user User
 
-	context.JSON(200, gin.H{
-		"username": "john",
-		"password": "secret",
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.Fail(&r.R{
+			Message: "序列化错误",
+		})
+		return
+	}
+
+	c.Ok(&r.R{
+		Data: r.H{
+			"username": "HelloWorld",
+		},
 	})
 }

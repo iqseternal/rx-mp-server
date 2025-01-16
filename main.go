@@ -6,14 +6,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type config struct {
-	PORT string
-	HOST string
-	URL  string
-}
-
 var (
-	Config = config{
+	Config = struct {
+		PORT string
+		HOST string
+		URL  string
+	}{
 		PORT: "8080",
 		HOST: "localhost",
 		URL:  "localhost:8080",

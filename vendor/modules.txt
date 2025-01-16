@@ -48,6 +48,9 @@ github.com/gabriel-vasile/mimetype
 github.com/gabriel-vasile/mimetype/internal/charset
 github.com/gabriel-vasile/mimetype/internal/json
 github.com/gabriel-vasile/mimetype/internal/magic
+# github.com/gin-contrib/cors v1.7.3
+## explicit; go 1.21.0
+github.com/gin-contrib/cors
 # github.com/gin-contrib/sse v1.0.0
 ## explicit; go 1.13
 github.com/gin-contrib/sse
@@ -79,6 +82,9 @@ github.com/goccy/go-json/internal/encoder/vm_color_indent
 github.com/goccy/go-json/internal/encoder/vm_indent
 github.com/goccy/go-json/internal/errors
 github.com/goccy/go-json/internal/runtime
+# github.com/golang-jwt/jwt/v5 v5.2.1
+## explicit; go 1.18
+github.com/golang-jwt/jwt/v5
 # github.com/jonboulle/clockwork v0.5.0
 ## explicit; go 1.21
 # github.com/json-iterator/go v1.1.12
@@ -87,6 +93,8 @@ github.com/json-iterator/go
 # github.com/klauspost/cpuid/v2 v2.2.9
 ## explicit; go 1.20
 github.com/klauspost/cpuid/v2
+# github.com/kr/text v0.2.0
+## explicit
 # github.com/leodido/go-urn v1.4.0
 ## explicit; go 1.18
 github.com/leodido/go-urn

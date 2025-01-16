@@ -1,17 +1,14 @@
-package common
+package logger
 
-type LoggerStruct struct {
+func init() {
+
 }
-
-var (
-	Logger = LoggerStruct{}
-)
 
 func log(args ...string) {
 
 }
 
-func (*LoggerStruct) Info(args ...string) {
+func Info(args ...string) {
 	log(args...)
 }
 
