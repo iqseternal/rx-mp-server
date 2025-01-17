@@ -37,3 +37,4 @@
 {"client_ip":"127.0.0.1","latency_time":0,"level":"info","msg":"","req_method":"POST","req_uri":"/login","status_code":200,"time":"2025-01-16 20:09:07"}
 {"client_ip":"127.0.0.1","latency_time":0,"level":"info","msg":"","req_method":"POST","req_uri":"/login","status_code":200,"time":"2025-01-16 20:09:11"}
 {"client_ip":"127.0.0.1","latency_time":0,"level":"info","msg":"","req_method":"POST","req_uri":"/login","status_code":200,"time":"2025-01-16 20:09:19"}
+{"client_ip":"127.0.0.1","latency_time":505200,"level":"info","msg":"","req_method":"POST","req_uri":"/login","status_code":200,"time":"2025-01-16 20:32:59"}
