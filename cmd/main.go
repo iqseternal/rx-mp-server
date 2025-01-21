@@ -1,16 +1,18 @@
 package main
 
 import (
-	"demo/internal/app"
-	"demo/internal/pkg/config"
+	_ "demo/internal/pkg/config"
+
+	"demo/internal/pkg/db"
+	_ "demo/internal/pkg/db"
+	"fmt"
 )
 
+import "demo/internal/app"
+
 func main() {
-	cfg, err := config.NewConfig()
+	app.Run()
 
-	if err != nil {
-		panic(err)
-	}
-
-	app.Run(cfg)
+	name := db.RdRedis.Get(db.RdRedisContext, "name")
+	fmt.Printf("name: %s\n", name)
 }

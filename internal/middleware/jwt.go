@@ -20,7 +20,7 @@ func JwtGuard() gin.HandlerFunc {
 			return
 		}
 
-		claims, err := jwt.Jwt.VerifyToken(authHeader)
+		claims, err := jwt.VerifyToken(authHeader)
 
 		if err != nil {
 			c.JSON(200, gin.H{

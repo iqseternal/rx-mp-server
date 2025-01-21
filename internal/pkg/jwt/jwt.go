@@ -8,27 +8,13 @@ import (
 
 const jwtSecret = "secret"
 
-var Jwt *JwtStruct
-
-type JwtStruct struct {
-}
-
-type JwtInterface interface {
-	GenerateToken(string) (string, error)
-	VerifyToken(string) (*JwtClaims, error)
-}
-
-type JwtClaims struct {
+type Claims struct {
 	Id string
 	*jwt.RegisteredClaims
 }
 
-func init() {
-	Jwt = new(JwtStruct)
-}
-
-func (jwtStruct *JwtStruct) GenerateToken(id string) (string, error) {
-	tokenStruct := jwt.NewWithClaims(jwt.SigningMethodES256, JwtClaims{
+func GenerateToken(id string) (string, error) {
+	tokenStruct := jwt.NewWithClaims(jwt.SigningMethodES256, Claims{
 		Id: id,
 		RegisteredClaims: &jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
@@ -48,8 +34,8 @@ func (jwtStruct *JwtStruct) GenerateToken(id string) (string, error) {
 	return token, nil
 }
 
-func (jwtStruct *JwtStruct) VerifyToken(tokenString string) (*JwtClaims, error) {
-	tokenObj, err := jwt.ParseWithClaims(tokenString, &JwtClaims{}, func(token *jwt.Token) (interface{}, error) {
+func VerifyToken(tokenString string) (*Claims, error) {
+	tokenObj, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(jwtSecret), nil
 	})
 
@@ -57,7 +43,7 @@ func (jwtStruct *JwtStruct) VerifyToken(tokenString string) (*JwtClaims, error) 
 		return nil, err
 	}
 
-	if claims, ok := tokenObj.Claims.(*JwtClaims); ok && tokenObj.Valid {
+	if claims, ok := tokenObj.Claims.(*Claims); ok && tokenObj.Valid {
 		fmt.Printf("%v %v\n", claims.Id, claims.RegisteredClaims)
 		return claims, nil
 	}

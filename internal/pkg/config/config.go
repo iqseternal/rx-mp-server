@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"gopkg.in/yaml.v3"
 	"os"
 )
@@ -9,24 +8,25 @@ import (
 type (
 	// Config -.
 	Config struct {
-		App  App  `yaml:"app"`
-		Http Http `yaml:"http"`
-		PG   PG   `yaml:"postgres"`
+		App     app     `yaml:"app"`
+		Http    http    `yaml:"http"`
+		RdPg    rdPg    `yaml:"rd_pg"`
+		RdRedis rdRedis `yaml:"rd_redis"`
 	}
 
-	// App -.
-	App struct {
+	// app -.
+	app struct {
 		Name    string `env-required:"true" yaml:"name"    env:"APP_NAME"`
 		Version string `env-required:"true" yaml:"version" env:"APP_VERSION"`
 	}
 
-	// Http -.
-	Http struct {
+	// http -.
+	http struct {
 		Port string `env-required:"true" yaml:"port" env:"HTTP_PORT"`
 	}
 
-	// PG -.
-	PG struct {
+	// rdPg -.
+	rdPg struct {
 		Host     string `env-required:"true"  yaml:"host"             env:"PG_HOST"`
 		User     string `env-required:"true" yaml:"user" env:"PG_USER"`
 		Password string `env-required:"true" yaml:"password" env:"PG_PASSWORD"`
@@ -35,23 +35,65 @@ type (
 		SslMode  string `yaml:"ssl_mode" env:"PG_SSL_MODE"`
 		TimeZone string `yaml:"time_zone" env:"PG_TIMEZONE"`
 	}
+
+	// rdRedis -
+	rdRedis struct {
+		Addr     string `yaml:"addr"`
+		Password string `yaml:"password"`
+	}
 )
 
-// NewConfig returns app config.
-func NewConfig() (*Config, error) {
-	cfg := &Config{}
+type EnvEnum struct {
+	Dev  string
+	Test string
+	Prod string
+}
 
-	dataBytes, err := os.ReadFile("config/development.yaml")
-	if err != nil {
-		fmt.Println("Error reading config.yaml")
-		return nil, err
+var (
+	Env = &EnvEnum{
+		Dev:  "dev",
+		Test: "test",
+		Prod: "prod",
+	}
+)
+
+var (
+	RdPg    *rdPg
+	RdRedis *rdRedis
+	App     *app
+	Http    *http
+)
+
+func init() {
+	env := os.Getenv("ENV")
+	if env == "" {
+		env = "dev"
 	}
 
-	err = yaml.Unmarshal(dataBytes, cfg)
-	if err != nil {
-		fmt.Println("Error parsing config.yaml")
-		return nil, err
-	}
+	switch env {
+	case Env.Dev:
+		config := &Config{}
 
-	return cfg, nil
+		dataBytes, err := os.ReadFile("config/development.yaml")
+		if err != nil {
+			panic(err)
+		}
+
+		err = yaml.Unmarshal(dataBytes, config)
+		if err != nil {
+			panic(err)
+		}
+
+		RdPg = &config.RdPg
+		RdRedis = &config.RdRedis
+		App = &config.App
+		Http = &config.Http
+		break
+	case Env.Test:
+		panic("还未指定测试环境")
+	case Env.Prod:
+		panic("还未指定生成环境")
+	default:
+		panic("意料之外的环境")
+	}
 }

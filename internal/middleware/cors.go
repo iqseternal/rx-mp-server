@@ -5,15 +5,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Cors 处理前端跨域的中间件
 func Cors() gin.HandlerFunc {
 
-	return cors.New(cors.Config{
-		AllowAllOrigins: true,
-		AllowHeaders: []string{
-			"Origin", "Content-Length", "Content-Type",
-		},
-		AllowMethods: []string{
-			"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD",
-		},
-	})
+	config := cors.DefaultConfig()
+
+	config.AllowAllOrigins = true
+	config.AllowCredentials = true
+	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
+	config.AddAllowMethods("OPTIONS", "UPDATE")
+
+	return cors.New(config)
 }

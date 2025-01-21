@@ -2,9 +2,8 @@ package app
 
 import (
 	"demo/internal/pkg/config"
-	"demo/internal/pkg/db"
 	"demo/internal/router"
-	"fmt"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,9 +11,7 @@ func init() {
 	gin.SetMode(gin.DebugMode)
 }
 
-func Run(config *config.Config) {
-	db.Init(config)
-
+func Run() {
 	r := gin.New()
 
 	router.InitRouter(r)
@@ -22,6 +19,6 @@ func Run(config *config.Config) {
 	err := r.Run(":" + config.Http.Port)
 
 	if err != nil {
-		fmt.Println("启动失败")
+		panic("启动失败")
 	}
 }
