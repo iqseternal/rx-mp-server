@@ -3,12 +3,11 @@ package main
 import (
 	_ "demo/internal/pkg/config"
 
+	"demo/internal/app"
 	"demo/internal/pkg/db"
 	_ "demo/internal/pkg/db"
 	"fmt"
 )
-
-import "demo/internal/app"
 
 func main() {
 	app.Run()
