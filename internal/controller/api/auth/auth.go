@@ -1,41 +1,42 @@
 package auth
 
 import (
-	"demo/pkg/r"
+	"rx-mp/pkg/rx"
+
 	"github.com/gin-gonic/gin"
 )
 
 func RegisterAuthController(router *gin.Engine) {
-	router.POST("/api/auth/get_access_token", r.WrapHandler(GetAccessToken))
-	router.POST("/api/auth/get_refresh_token", r.WrapHandler(GetRefreshToken))
+	router.POST("/api/auth/get_access_token", rx.WrapHandler(GetAccessToken))
+	router.POST("/api/auth/get_refresh_token", rx.WrapHandler(GetRefreshToken))
 
-	router.POST("/api/auth/update_access_token", r.WrapHandler(UpdateAccessToken))
-	router.POST("/api/auth/update_refresh_token", r.WrapHandler(UpdateRefreshToken))
+	router.POST("/api/auth/update_access_token", rx.WrapHandler(UpdateAccessToken))
+	router.POST("/api/auth/update_refresh_token", rx.WrapHandler(UpdateRefreshToken))
 
-	router.POST("/api/auth/logout_access_token", r.WrapHandler(LogoutAccessToken))
-	router.POST("/api/auth/logout_refresh_token", r.WrapHandler(LogoutRefreshToken))
+	router.POST("/api/auth/logout_access_token", rx.WrapHandler(LogoutAccessToken))
+	router.POST("/api/auth/logout_refresh_token", rx.WrapHandler(LogoutRefreshToken))
 }
 
-func GetAccessToken(r *r.Context) {
-
-}
-
-func GetRefreshToken(r *r.Context) {
+func GetAccessToken(r *rx.Context) {
 
 }
 
-func UpdateAccessToken(r *r.Context) {
+func GetRefreshToken(r *rx.Context) {
 
 }
 
-func UpdateRefreshToken(r *r.Context) {
+func UpdateAccessToken(r *rx.Context) {
 
 }
 
-func LogoutAccessToken(r *r.Context) {
+func UpdateRefreshToken(r *rx.Context) {
 
 }
 
-func LogoutRefreshToken(r *r.Context) {
+func LogoutAccessToken(r *rx.Context) {
+
+}
+
+func LogoutRefreshToken(r *rx.Context) {
 
 }

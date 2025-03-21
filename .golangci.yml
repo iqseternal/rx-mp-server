@@ -1,8 +1,28 @@
 linters:
   disable-all: true  # 关闭其他linter
+  enable:
+    - govet       # 基础语法检查（含标签格式）
+    - tagalign    # 标签对齐检查
+    - gofmt       # 代码格式化
+    - gosimple    # 简化冗余代码
+    - staticcheck # 静态分析（含未使用字段检测）
+    - unused      # 检测未使用结构体字段
+
 linters-settings:
-  govet:            # 对于linter govet，这里手动开启了它的某些扫描规则
-    check-shadowing: false
-    check-unreachable: false
-    check-rangeloops: false
-    check-copylocks: false
+  structcheck:
+    check-required-tags: env
+
+  govet:
+    check-shadowing: false    # 关闭变量遮蔽检查
+    check-tagformat: true    # 强制标签格式校验[3](@ref)
+    check-rangeloops: false  # 关闭循环变量引用检查
+
+  tagalign:
+    # 标签对齐模式（JSON/YAML/Env 等）
+    align:
+      - json
+      - yaml
+      - env
+
+    # 标签顺序强制要求（例如 json 必须在前）
+    order: json,yaml,env

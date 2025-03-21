@@ -1,18 +1,20 @@
 package v1
 
 import (
-	"demo/internal/models"
-	"demo/internal/pkg/common"
-	"demo/internal/pkg/db"
-	"demo/pkg/r"
+	"log"
+	rd_client "rx-mp/internal/models/rd/client"
+	"rx-mp/internal/pkg/common"
+	"rx-mp/internal/pkg/storage"
+
+	"rx-mp/pkg/rx"
+
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
-	"log"
 )
 
 func RegisterUserController(router *gin.Engine) {
-	router.POST("/api/v1/user/login", r.WrapHandler(Login))
-	router.POST("/api/v1/user/register", r.WrapHandler(Register))
+	router.POST("/api/v1/user/login", rx.WrapHandler(Login))
+	router.POST("/api/v1/user/register", rx.WrapHandler(Register))
 }
 
 type LoginPayload struct {
@@ -20,29 +22,30 @@ type LoginPayload struct {
 	Password string `json:"password" binding:"required,min=8"`
 }
 
-func Login(c *r.Context) {
+func Login(c *rx.Context) {
 	var payload LoginPayload
 	if err := c.ShouldBindJSON(&payload); err != nil {
-		c.Fail(&r.R{
+		c.Fail(&rx.R{
 			Error: err.Error(),
 		})
 		return
 	}
 
-	var user models.RdClientUser
-	result := db.RdPg.
+	var user rd_client.User
+	result := storage.RdPostgress.
 		Where("email = ?", payload.Email).
 		Order("created_at desc").
+		Limit(1).
 		First(&user)
 
 	if result.Error != nil {
-		c.Fail(&r.R{
+		c.Fail(&rx.R{
 			Error: result.Error.Error(),
 		})
 		return
 	}
 
-	c.Ok(&r.R{
+	c.Ok(&rx.R{
 		Data: &user,
 	})
 }
@@ -53,23 +56,23 @@ type RegisterPayload struct {
 	Password string `json:"password" binding:"required,min=8"`
 }
 
-func Register(c *r.Context) {
+func Register(c *rx.Context) {
 	var payload RegisterPayload
 
 	if err := c.ShouldBindJSON(&payload); err != nil {
-		c.Fail(&r.R{
+		c.Fail(&rx.R{
 			Error: err.Error(),
 		})
 		return
 	}
 
 	email := payload.Email
-	var user models.RdClientUser
+	var user rd_client.User
 
-	result := db.RdPg.Where("email = ?", email).First(&user)
+	result := storage.RdPostgress.Where("email = ?", email).First(&user)
 
 	if result.Error == nil {
-		c.Fail(&r.R{
+		c.Fail(&rx.R{
 			Error: "email is exist",
 		})
 		return
@@ -85,7 +88,7 @@ func Register(c *r.Context) {
 	password := string(hashedPassword)
 
 	// 创建用户对象
-	user = models.RdClientUser{
+	user = rd_client.User{
 		Email:    payload.Email,
 		Username: payload.Username,
 		Password: &password,
@@ -96,15 +99,15 @@ func Register(c *r.Context) {
 		user.Username = "用户" + common.GenerateRandomHexStr(5)
 	}
 
-	result = db.RdPg.Create(&user)
+	result = storage.RdPostgress.Create(&user)
 	if result.Error != nil {
-		c.Fail(&r.R{
+		c.Fail(&rx.R{
 			Error: result.Error.Error(),
 		})
 		return
 	}
 
-	c.Ok(&r.R{
+	c.Ok(&rx.R{
 		Data: &user,
 	})
 }

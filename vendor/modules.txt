@@ -45,6 +45,9 @@ github.com/cespare/xxhash/v2
 # github.com/cloudwego/base64x v0.1.4
 ## explicit; go 1.16
 github.com/cloudwego/base64x
+# github.com/coocood/freecache v1.2.4
+## explicit; go 1.13
+github.com/coocood/freecache
 # github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f
 ## explicit
 github.com/dgryski/go-rendezvous

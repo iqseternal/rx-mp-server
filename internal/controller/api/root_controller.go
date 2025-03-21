@@ -1,23 +1,25 @@
 package api
 
 import (
-	"demo/pkg/r"
-	"github.com/gin-gonic/gin"
 	"net/http"
+	"rx-mp/pkg/rx"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 func RegisterRootController(router *gin.Engine) {
-	router.GET("/api", r.WrapHandler(Root))
-	router.GET("/api/t", r.WrapHandler(T))
+	router.GET("/api", rx.WrapHandler(Root))
+	router.GET("/api/t", rx.WrapHandler(T))
 }
 
-func Root(c *r.Context) {
+func Root(c *rx.Context) {
 	c.Redirect(http.StatusMovedPermanently, "http://rapid.oupro.cn")
 }
 
-func T(c *r.Context) {
-	c.Ok(&r.R{
+func T(c *rx.Context) {
+
+	c.Ok(&rx.R{
 		Data: time.Now().UnixMilli(),
 	})
 }

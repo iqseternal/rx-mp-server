@@ -1,9 +1,10 @@
 package middleware
 
 import (
-	"demo/internal/pkg/jwt"
-	"github.com/gin-gonic/gin"
+	"rx-mp/internal/pkg/jwt"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 func JwtGuard() gin.HandlerFunc {

@@ -1,5 +1,8 @@
 
-# Go Demo
-[🇨🇳中文](README_CN.md)
+# Go
+
+rx-mp-server
 
 ## Overview
+
+rapid 的后台服务编写

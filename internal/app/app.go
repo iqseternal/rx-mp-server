@@ -1,17 +1,15 @@
 package app
 
 import (
-	"demo/internal/pkg/config"
-	"demo/internal/router"
+	"rx-mp/config"
+	"rx-mp/internal/router"
 
 	"github.com/gin-gonic/gin"
 )
 
-func init() {
-	gin.SetMode(gin.DebugMode)
-}
-
 func Run() {
+	gin.SetMode(gin.DebugMode)
+
 	r := gin.New()
 
 	router.InitRouter(r)
