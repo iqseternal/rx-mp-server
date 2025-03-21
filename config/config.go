@@ -38,7 +38,7 @@ type RdRedisConfig struct {
 type Config struct {
 	App         AppConfig        `yaml:"app"`
 	Http        HttpConfig       `yaml:"http"`
-	RdPostgress RdPostgresConfig `yaml:"rd_pg"`
+	RdPostgress RdPostgresConfig `yaml:"postgres"`
 	RdRedis     RdRedisConfig    `yaml:"rd_redis"`
 }
 
