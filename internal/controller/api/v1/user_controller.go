@@ -4,9 +4,12 @@ import (
 	"log"
 	rd_client "rx-mp/internal/models/rd/client"
 	"rx-mp/internal/pkg/common"
+	"rx-mp/internal/pkg/jwt"
 	"rx-mp/internal/pkg/storage"
 
 	"rx-mp/internal/pkg/rx"
+
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -32,7 +35,6 @@ func Login(c *rx.Context) {
 	var user rd_client.User
 	result := storage.RdPostgress.
 		Where("email = ?", payload.Email).
-		Order("created_at desc").
 		Limit(1).
 		First(&user)
 
@@ -41,7 +43,26 @@ func Login(c *rx.Context) {
 		return
 	}
 
-	c.Ok(&user)
+	accssToken, err := jwt.GenerateAccessToken(fmt.Sprint(user.UserID))
+	if err != nil {
+		fmt.Println("生成 access token 出错", err.Error())
+		c.FailWithMessage(err.Error(), nil)
+		return
+	}
+
+	refreshToken, err := jwt.GenerateRefershToken(fmt.Sprint(user.UserID))
+	if err != nil {
+		fmt.Println("生成 refresh token 出错", err.Error())
+		c.FailWithMessage(err.Error(), nil)
+		return
+	}
+
+	c.Ok(&rx.H{
+		"tokens": &rx.H{
+			"access_token":  accssToken,
+			"refresh_token": refreshToken,
+		},
+	})
 }
 
 type RegisterPayload struct {

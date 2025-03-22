@@ -1,0 +1,17 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "oupro.cn",
+            "port": 58063,
+            "driver": "PostgreSQL",
+            "name": "rapid",
+            "database": "rapid",
+            "username": "postgres"
+        }
+    ],
+    "go.lintTool": "golangci-lint",
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "never"
+    }
+}

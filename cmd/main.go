@@ -1,6 +1,7 @@
 package main
 
 import (
+	"runtime"
 	_ "rx-mp/config"
 
 	"fmt"
@@ -9,6 +10,10 @@ import (
 )
 
 func main() {
+	if runtime.GOARCH != "amd64" && runtime.GOARCH != "arm64" {
+		panic("unsupported 32-bit architecture")
+	}
+
 	app.Run()
 
 	name := storage.RdRedis.Get(storage.RdRedisContext, "name")

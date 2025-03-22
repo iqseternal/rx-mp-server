@@ -3,7 +3,6 @@ package storage
 import (
 	"fmt"
 	"rx-mp/config"
-	rd_client "rx-mp/internal/models/rd/client"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -39,25 +38,4 @@ func refactoringRdClient(db *gorm.DB) {
 		fmt.Println("重构表结构? 如果确信操作, 请注释 return 块")
 		return
 	}
-
-	_ = db.Migrator().DropTable(&rd_client.User{})
-	_ = db.AutoMigrate(&rd_client.User{})
-
-	_ = db.Migrator().DropTable(&rd_client.Organization{})
-	_ = db.AutoMigrate(&rd_client.Organization{})
-
-	_ = db.Migrator().DropTable(&rd_client.UserOrganization{})
-	_ = db.AutoMigrate(&rd_client.UserOrganization{})
-
-	_ = db.Migrator().DropTable(&rd_client.Role{})
-	_ = db.AutoMigrate(&rd_client.Role{})
-
-	_ = db.Migrator().DropTable(&rd_client.UserRole{})
-	_ = db.AutoMigrate(&rd_client.UserRole{})
-
-	_ = db.Migrator().DropTable(&rd_client.UserPermission{})
-	_ = db.AutoMigrate(&rd_client.UserPermission{})
-
-	_ = db.Migrator().DropTable(&rd_client.RolePermission{})
-	_ = db.AutoMigrate(&rd_client.RolePermission{})
 }

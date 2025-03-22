@@ -19,8 +19,9 @@ const (
 	BizBadGateway          = http.StatusBadGateway
 
 	// 错误化状态码：< -1000
-	BizUserNotFound = -1001
-	BizTokenExpired = -2001
+
+	BizAccessTokenInvalid  = -1001
+	BizRefreshTokenInvalid = -1002
 
 	// 业务化状态码: >1000
 	BizUserNotHasAdminRole = 1001
@@ -39,12 +40,13 @@ var bizMessage = map[int]string{
 	BizNotImplemented:      http.StatusText(BizNotImplemented),
 	BizBadGateway:          http.StatusText(BizBadGateway),
 
-	BizUserNotFound: "User not found",
-	BizTokenExpired: "Token expired",
+	BizAccessTokenInvalid:  "AccessToken is not valid",
+	BizRefreshTokenInvalid: "RefreshToken is not valid",
 
 	BizUserNotHasAdminRole: "User does not have admin role",
 }
 
+// BizMessage 获取预定义状态码内置的错误消息返回
 func BizMessage(code int) *string {
 
 	text := bizMessage[code]

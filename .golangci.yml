@@ -19,11 +19,14 @@ linters-settings:
 
   tagalign:
 
-    # # 标签对齐模式（JSON/YAML/Env 等）
-    # align:
-    #   - json
-    #   - yaml
-    #   - env
+    # 标签对齐模式（JSON/YAML/Env 等）
+    align: true
+
+    sort: true
+    strict: false
 
     # 标签顺序强制要求（例如 json 必须在前）
     order: json,yaml,env
+
+run:
+  fix: false  # 全局启用自动修复功能（支持 tagalign/gofmt 等工具的修复）
