@@ -18,11 +18,12 @@ linters-settings:
     check-rangeloops: false  # 关闭循环变量引用检查
 
   tagalign:
-    # 标签对齐模式（JSON/YAML/Env 等）
-    align:
-      - json
-      - yaml
-      - env
+
+    # # 标签对齐模式（JSON/YAML/Env 等）
+    # align:
+    #   - json
+    #   - yaml
+    #   - env
 
     # 标签顺序强制要求（例如 json 必须在前）
     order: json,yaml,env

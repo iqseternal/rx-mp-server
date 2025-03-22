@@ -2,7 +2,7 @@ package api
 
 import (
 	"net/http"
-	"rx-mp/pkg/rx"
+	"rx-mp/internal/pkg/rx"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -19,7 +19,5 @@ func Root(c *rx.Context) {
 
 func T(c *rx.Context) {
 
-	c.Ok(&rx.R{
-		Data: time.Now().UnixMilli(),
-	})
+	c.Ok(time.Now().UnixMilli())
 }

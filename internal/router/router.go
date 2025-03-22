@@ -7,7 +7,7 @@ import (
 	"rx-mp/internal/controller/api/auth"
 	v1 "rx-mp/internal/controller/api/v1"
 	"rx-mp/internal/middleware"
-	"rx-mp/pkg/rx"
+	"rx-mp/internal/pkg/rx"
 
 	"github.com/gin-gonic/gin"
 )
@@ -40,9 +40,7 @@ func noMethod(c *rx.Context) {
 		return
 	}
 
-	c.Fail(&rx.R{
-		Error: "Method not allowe",
-	})
+	c.FailWithMessage("Method not allowe", nil)
 }
 
 func noRoute(c *rx.Context) {
@@ -51,7 +49,5 @@ func noRoute(c *rx.Context) {
 		return
 	}
 
-	c.Fail(&rx.R{
-		Error: "Route not found",
-	})
+	c.FailWithMessage("Route not found", nil)
 }

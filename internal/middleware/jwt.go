@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"rx-mp/internal/pkg/jwt"
+	"rx-mp/internal/pkg/rx"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -9,7 +10,7 @@ import (
 
 func JwtGuard() gin.HandlerFunc {
 
-	return func(c *gin.Context) {
+	return rx.WrapHandler(func(c *rx.Context) {
 		authHeader := c.Request.Header.Get("Authorization")
 
 		if authHeader == "" {
@@ -21,7 +22,7 @@ func JwtGuard() gin.HandlerFunc {
 			return
 		}
 
-		claims, err := jwt.VerifyToken(authHeader)
+		claims, err := jwt.VerifyAccessToken(authHeader)
 
 		if err != nil {
 			c.JSON(200, gin.H{
@@ -41,7 +42,7 @@ func JwtGuard() gin.HandlerFunc {
 			return
 		}
 
-		c.Set("id", claims.Id)
+		c.Set("id", claims.UserId)
 		c.Next()
-	}
+	})
 }

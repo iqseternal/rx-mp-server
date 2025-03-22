@@ -6,7 +6,7 @@ import (
 	"rx-mp/internal/pkg/common"
 	"rx-mp/internal/pkg/storage"
 
-	"rx-mp/pkg/rx"
+	"rx-mp/internal/pkg/rx"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -18,16 +18,14 @@ func RegisterUserController(router *gin.Engine) {
 }
 
 type LoginPayload struct {
-	Email    string `json:"email" binding:"required,email"`
+	Email    string `json:"email"    binding:"required,email"`
 	Password string `json:"password" binding:"required,min=8"`
 }
 
 func Login(c *rx.Context) {
 	var payload LoginPayload
 	if err := c.ShouldBindJSON(&payload); err != nil {
-		c.Fail(&rx.R{
-			Error: err.Error(),
-		})
+		c.FailWithMessage(err.Error(), nil)
 		return
 	}
 
@@ -39,19 +37,15 @@ func Login(c *rx.Context) {
 		First(&user)
 
 	if result.Error != nil {
-		c.Fail(&rx.R{
-			Error: result.Error.Error(),
-		})
+		c.FailWithMessage(result.Error.Error(), nil)
 		return
 	}
 
-	c.Ok(&rx.R{
-		Data: &user,
-	})
+	c.Ok(&user)
 }
 
 type RegisterPayload struct {
-	Email    string `json:"email" binding:"required,email"`
+	Email    string `json:"email"    binding:"required,email"`
 	Username string `json:"username" binding:"omitempty,min=3,max=20"`
 	Password string `json:"password" binding:"required,min=8"`
 }
@@ -60,9 +54,7 @@ func Register(c *rx.Context) {
 	var payload RegisterPayload
 
 	if err := c.ShouldBindJSON(&payload); err != nil {
-		c.Fail(&rx.R{
-			Error: err.Error(),
-		})
+		c.FailWithMessage(err.Error(), nil)
 		return
 	}
 
@@ -72,9 +64,7 @@ func Register(c *rx.Context) {
 	result := storage.RdPostgress.Where("email = ?", email).First(&user)
 
 	if result.Error == nil {
-		c.Fail(&rx.R{
-			Error: "email is exist",
-		})
+		c.FailWithMessage("email is exist", nil)
 		return
 	}
 
@@ -101,9 +91,7 @@ func Register(c *rx.Context) {
 
 	result = storage.RdPostgress.Create(&user)
 	if result.Error != nil {
-		c.Fail(&rx.R{
-			Error: result.Error.Error(),
-		})
+		c.FailWithMessage(result.Error.Error(), nil)
 		return
 	}
 
