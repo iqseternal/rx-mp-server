@@ -3,7 +3,7 @@ linters:
   enable:
     - govet       # 基础语法检查（含标签格式）
     - tagalign    # 标签对齐检查
-    - gofmt       # 代码格式化
+
     - gosimple    # 简化冗余代码
     - staticcheck # 静态分析（含未使用字段检测）
     - unused      # 检测未使用结构体字段

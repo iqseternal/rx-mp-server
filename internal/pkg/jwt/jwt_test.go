@@ -4,7 +4,10 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
+	"log"
 	"testing"
 )
 
@@ -16,17 +19,23 @@ func TestGenerateJwtRefreshTokenSecret(t *testing.T) {
 
 }
 
-func TestGenerateES256Secret(t *testing.T) {
-	key := make([]byte, 32)
+func TestGenerateECDSSecret(t *testing.T) {
+	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 
-	if _, err := rand.Read(key); err != nil {
-		panic("密钥生成失败：" + err.Error())
-	}
-
-	priKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
-		panic("私钥生成失败：" + err.Error())
+		panic("生成密钥失败")
 	}
 
-	fmt.Println(priKey)
+	der, err := x509.MarshalECPrivateKey(privateKey)
+
+	if err != nil {
+		log.Fatalf("无法序列化私钥: %v", err)
+	}
+
+	pemBlock := &pem.Block{
+		Type:  "EC PRIVATE KEY",
+		Bytes: der,
+	}
+
+	fmt.Println(string(pem.EncodeToMemory(pemBlock)))
 }

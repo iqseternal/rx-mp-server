@@ -26,7 +26,12 @@ func GenerateAccessToken(user_id string) (string, error) {
 		},
 	})
 
-	token, err := tokenStruct.SignedString([]byte(constants.AccessJwtSecret))
+	secret, err := ParseECDSAPemToPrivateKey(constants.AccessJwtSecret)
+	if err != nil {
+		return "", err
+	}
+
+	token, err := tokenStruct.SignedString(secret)
 	if err != nil {
 		return "", err
 	}
@@ -39,7 +44,13 @@ func VerifyAccessToken(tokenString string) (*AccessJwtClaims, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(constants.AccessJwtSecret), nil
+
+		secret, err := ParseECDSAPemToPrivateKey(constants.AccessJwtSecret)
+		if err != nil {
+			return "", err
+		}
+
+		return secret, nil
 	})
 
 	if err != nil {
