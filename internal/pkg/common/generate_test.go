@@ -17,7 +17,7 @@ func TestGenerateRandomHexStr(t *testing.T) {
 }
 
 func TestGenerateRandomHexColor(t *testing.T) {
-	t.Run("检测随机十六进制颜色生成", func(t *testing.T) {
+	t.Run("检测随机十六进制颜色生成格式", func(t *testing.T) {
 		for i := uint(1); i < 50; i++ {
 			str := GenerateRandomHexColor()
 
