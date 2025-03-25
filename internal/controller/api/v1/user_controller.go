@@ -27,6 +27,7 @@ type LoginPayload struct {
 
 func Login(c *rx.Context) {
 	var payload LoginPayload
+
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		c.FailWithMessage(err.Error(), nil)
 		return
