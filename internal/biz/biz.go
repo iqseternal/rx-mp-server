@@ -19,9 +19,11 @@ const (
 	BizBadGateway          = http.StatusBadGateway
 
 	// 错误化状态码：< -1000
+	BizBearerAuthorizationInvalid = -1001
 
-	BizAccessTokenInvalid  = -1001
-	BizRefreshTokenInvalid = -1002
+	BizAccessTokenInvalid  = -2002
+	BizRefreshTokenInvalid = -2003
+	BizDatabaseQueryError  = -2004
 
 	// 业务化状态码: >1000
 	BizUserNotHasAdminRole = 1001
@@ -40,8 +42,10 @@ var bizMessage = map[int]string{
 	BizNotImplemented:      http.StatusText(BizNotImplemented),
 	BizBadGateway:          http.StatusText(BizBadGateway),
 
-	BizAccessTokenInvalid:  "AccessToken is not valid",
-	BizRefreshTokenInvalid: "RefreshToken is not valid",
+	BizBearerAuthorizationInvalid: "Bearer Authorization Invalid",
+	BizAccessTokenInvalid:         "AccessToken is not valid",
+	BizRefreshTokenInvalid:        "RefreshToken is not valid",
+	BizDatabaseQueryError:         "database query error",
 
 	BizUserNotHasAdminRole: "User does not have admin role",
 }

@@ -26,7 +26,7 @@ func GenerateAccessToken(user_id string) (string, error) {
 		},
 	})
 
-	secret, err := ParseECDSAPemToPrivateKey(constants.AccessJwtSecret)
+	secret, err := ParseECDSAPemToPrivateKey(constants.AccessJwtPrivateSecret)
 	if err != nil {
 		return "", err
 	}
@@ -41,13 +41,13 @@ func GenerateAccessToken(user_id string) (string, error) {
 
 func VerifyAccessToken(tokenString string) (*AccessJwtClaims, error) {
 	tokenObj, err := jwt.ParseWithClaims(tokenString, &RefreshJwtClaims{}, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+		if _, ok := token.Method.(*jwt.SigningMethodECDSA); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		secret, err := ParseECDSAPemToPrivateKey(constants.AccessJwtSecret)
+		secret, err := ParseECDSAPemToPublicKey(constants.RefreshJwtPublicSecret)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
 		return secret, nil
@@ -57,16 +57,19 @@ func VerifyAccessToken(tokenString string) (*AccessJwtClaims, error) {
 		return nil, err
 	}
 
-	claims, ok := tokenObj.Claims.(*AccessJwtClaims)
-
-	if !ok || !tokenObj.Valid {
-		fmt.Printf("%v %v\n", claims.UserId, claims.RegisteredClaims)
-		return claims, nil
+	if !tokenObj.Valid {
+		return nil, fmt.Errorf("invalid token")
 	}
 
-	if claims.Issuer != constants.AccessJwtIssuer {
+	claims, ok := tokenObj.Claims.(*AccessJwtClaims)
+
+	if !ok {
+		return nil, fmt.Errorf("invalid claims type")
+	}
+
+	if claims.Issuer != constants.RefreshJwtIssuer {
 		return nil, fmt.Errorf("invalid issuer")
 	}
 
-	return nil, err
+	return claims, nil
 }

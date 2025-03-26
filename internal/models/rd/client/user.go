@@ -11,6 +11,8 @@ type User struct {
 
 	CreatedTime time.Time `json:"created_time" gorm:"autoCreateTime;default:CURRENT_TIMESTAMP;not null"` // 创建时间，自动设置，不能为空
 	UpdatedTime time.Time `json:"updated_time" gorm:"autoUpdateTime;default:CURRENT_TIMESTAMP;not null"` // 更新时间，自动更新，不能为空
+
+	RefreshToken *string `json:"refresh_token,omitempty" gorm:"column:refresh_token"`
 }
 
 func (c *User) TableName() string {

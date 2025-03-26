@@ -58,6 +58,19 @@ func Login(c *rx.Context) {
 		return
 	}
 
+	result = storage.RdPostgress.
+		Model(&user).
+		Where("user_id=?", user.UserID).
+		Update("refresh_token", refreshToken)
+
+	if result.Error != nil {
+		log.Println("更新 access token 出错:", result.Error)
+		c.FailWithMessage(result.Error.Error(), nil)
+		return
+	}
+
+	storage.MemoCache.Set(refreshToken, fmt.Sprint(user.UserID))
+
 	c.Ok(&rx.H{
 		"tokens": &rx.H{
 			"access_token":  accssToken,

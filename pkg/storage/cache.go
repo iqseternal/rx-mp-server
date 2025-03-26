@@ -2,6 +2,7 @@ package storage
 
 import (
 	"encoding/json"
+	"time"
 
 	"github.com/coocood/freecache"
 )
@@ -19,7 +20,13 @@ func NewMemoryCache(size int) *MemoryCache {
 }
 
 // Set 设置缓存值
-func (sc *MemoryCache) Set(key, value string, expireSeconds int) error {
+func (sc *MemoryCache) Set(key, value string) error {
+	expire := int(2 * time.Hour)
+	return sc.cache.Set([]byte(key), []byte(value), expire)
+}
+
+// SetWithExpire 设置缓存值
+func (sc *MemoryCache) SetWithExpire(key, value string, expireSeconds int) error {
 	return sc.cache.Set([]byte(key), []byte(value), expireSeconds)
 }
 

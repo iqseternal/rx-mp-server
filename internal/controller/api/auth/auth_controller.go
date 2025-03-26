@@ -1,10 +1,14 @@
 package auth
 
 import (
+	"fmt"
 	"net/http"
 	"rx-mp/internal/biz"
+	rd_client "rx-mp/internal/models/rd/client"
+	"rx-mp/internal/pkg/common"
 	"rx-mp/internal/pkg/jwt"
 	"rx-mp/internal/pkg/rx"
+	"rx-mp/internal/pkg/storage"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,9 +23,24 @@ func RegisterAuthController(router *gin.Engine) {
 	router.POST("/api/auth/logout_refresh_token", rx.WrapHandler(LogoutRefreshToken))
 }
 
+// GetAccessToken 接口：通过 refreshToken 来生成一个可用的 accessToken, 但是同时也会导致其他的 accessToken 失效
 func GetAccessToken(r *rx.Context) {
-	refreshToken := r.GetHeader("Authorization")
-	if refreshToken == "" {
+	authorization := r.GetHeader("Authorization")
+
+	refreshToken, err := common.ParseBearerAuthorizationToken(authorization)
+	if err != nil {
+		r.Finish(http.StatusUnauthorized, &rx.R{
+			Code:    biz.BizBearerAuthorizationInvalid,
+			Message: biz.BizMessage(biz.BizBearerAuthorizationInvalid),
+			Data:    nil,
+		})
+		return
+	}
+
+	var user *rd_client.User
+	result := storage.RdPostgress.Where("refresh_token=?", refreshToken).First(&user)
+
+	if result.Error != nil {
 		r.Finish(http.StatusUnauthorized, &rx.R{
 			Code:    biz.BizRefreshTokenInvalid,
 			Message: biz.BizMessage(biz.BizRefreshTokenInvalid),
@@ -33,6 +52,21 @@ func GetAccessToken(r *rx.Context) {
 	// 验证 Refresh Token 有效性
 	claims, err := jwt.VerifyRefershToken(refreshToken)
 	if err != nil {
+
+		fmt.Println(err.Error())
+
+		// 获取到了数据, 但是解析失败了?
+		result := storage.RdPostgress.Model(&user).Where("refresh_token=?", refreshToken).Update("refresh_token", nil)
+
+		if result.Error != nil {
+			r.Finish(http.StatusInternalServerError, &rx.R{
+				Code:    biz.BizDatabaseQueryError,
+				Message: biz.BizMessage(biz.BizDatabaseQueryError),
+				Data:    nil,
+			})
+			return
+		}
+
 		r.Finish(http.StatusUnauthorized, &rx.R{
 			Code:    biz.BizRefreshTokenInvalid,
 			Message: biz.BizMessage(biz.BizRefreshTokenInvalid),
