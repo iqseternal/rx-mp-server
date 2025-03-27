@@ -8,8 +8,8 @@ import (
 
 // AppConfig -.
 type AppConfig struct {
-	Name    string `env-required:"true" yaml:"name"    env:"APP_NAME"`
-	Version string `env-required:"true" yaml:"version" env:"APP_VERSION"`
+	Name    string `env-required:"true"	env:"APP_NAME"    yaml:"name"   `
+	Version string `env-required:"true"	env:"APP_VERSION" yaml:"version" `
 }
 
 // HttpConfig -.

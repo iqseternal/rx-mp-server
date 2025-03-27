@@ -2,9 +2,11 @@ package v1
 
 import (
 	"log"
+	"rx-mp/internal/middleware"
 	rd_client "rx-mp/internal/models/rd/client"
+	"rx-mp/internal/pkg/auth"
 	"rx-mp/internal/pkg/common"
-	"rx-mp/internal/pkg/jwt"
+	"rx-mp/internal/pkg/mbic"
 	"rx-mp/internal/pkg/storage"
 
 	"rx-mp/internal/pkg/rx"
@@ -16,8 +18,17 @@ import (
 )
 
 func RegisterUserController(router *gin.Engine) {
-	router.POST("/api/v1/user/login", rx.WrapHandler(Login))
-	router.POST("/api/v1/user/register", rx.WrapHandler(Register))
+	userPubGroup := router.Group("")
+	{
+		userPubGroup.POST("/api/v1/user/login", rx.WrapHandler(Login))
+		userPubGroup.POST("/api/v1/user/register", rx.WrapHandler(Register))
+	}
+
+	userAuthGroup := router.Group("")
+	userAuthGroup.Use(middleware.ResourceAccessControlMiddleware())
+	{
+		userAuthGroup.POST("/api/v1/user/get_user_info", rx.WrapHandler(GetUserInfo))
+	}
 }
 
 type LoginPayload struct {
@@ -44,14 +55,14 @@ func Login(c *rx.Context) {
 		return
 	}
 
-	accssToken, err := jwt.GenerateAccessToken(fmt.Sprint(user.UserID))
+	accssToken, err := auth.GenerateAccessToken(fmt.Sprint(user.UserID))
 	if err != nil {
 		fmt.Println("生成 access token 出错", err.Error())
 		c.FailWithMessage(err.Error(), nil)
 		return
 	}
 
-	refreshToken, err := jwt.GenerateRefershToken(fmt.Sprint(user.UserID))
+	refreshToken, err := auth.GenerateRefershToken(fmt.Sprint(user.UserID))
 	if err != nil {
 		fmt.Println("生成 refresh token 出错", err.Error())
 		c.FailWithMessage(err.Error(), nil)
@@ -94,9 +105,9 @@ func Register(c *rx.Context) {
 	}
 
 	email := payload.Email
-	var user rd_client.User
+	var user *rd_client.User
 
-	result := storage.RdPostgress.Where("email = ?", email).First(&user)
+	result := storage.RdPostgress.Where("email = ?", email).First(user)
 
 	if result.Error == nil {
 		c.FailWithMessage("email is exist", nil)
@@ -113,7 +124,7 @@ func Register(c *rx.Context) {
 	password := string(hashedPassword)
 
 	// 创建用户对象
-	user = rd_client.User{
+	user = &rd_client.User{
 		Email:    payload.Email,
 		Username: payload.Username,
 		Password: &password,
@@ -130,7 +141,15 @@ func Register(c *rx.Context) {
 		return
 	}
 
-	c.Ok(&rx.R{
-		Data: &user,
-	})
+	c.Ok(user)
+}
+
+func GetUserInfo(c *rx.Context) {
+	user, err := mbic.GetMBICUser(c.Context)
+	if err != nil {
+		c.FailWithMessage(err.Error(), nil)
+		return
+	}
+
+	c.Ok(user)
 }
