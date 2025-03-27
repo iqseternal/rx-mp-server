@@ -155,6 +155,7 @@ func GetRefreshToken(r *rx.Context) {
 		Message: biz.BizMessage(biz.BizMehodNotAllowed),
 		Data:    nil,
 	})
+
 	r.Abort()
 }
 
