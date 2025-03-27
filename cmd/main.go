@@ -2,8 +2,6 @@ package main
 
 import (
 	"runtime"
-	_ "rx-mp/config"
-
 	"rx-mp/internal/app"
 )
 

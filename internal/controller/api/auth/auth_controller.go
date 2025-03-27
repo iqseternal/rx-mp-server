@@ -4,27 +4,62 @@ import (
 	"fmt"
 	"net/http"
 	"rx-mp/internal/biz"
+	"rx-mp/internal/middleware"
 	rd_client "rx-mp/internal/models/rd/client"
+	"rx-mp/internal/pkg/auth"
 	"rx-mp/internal/pkg/common"
-	"rx-mp/internal/pkg/jwt"
+	"rx-mp/internal/pkg/mbic"
 	"rx-mp/internal/pkg/rx"
 	"rx-mp/internal/pkg/storage"
 
 	"github.com/gin-gonic/gin"
 )
 
+// RegisterAuthController 注册 auth 接口
 func RegisterAuthController(router *gin.Engine) {
-	router.POST("/api/auth/get_access_token", rx.WrapHandler(GetAccessToken))
-	router.POST("/api/auth/update_access_token", rx.WrapHandler(UpdateAccessToken))
-	router.POST("/api/auth/logout_access_token", rx.WrapHandler(LogoutAccessToken))
+	tokenGroup := router.Group("")
+	tokenGroup.Use(middleware.CredentialAccessControlMiddleware())
+	{
+		tokenGroup.POST("/api/auth/get_access_token", rx.WrapHandler(GetAccessToken))
+		tokenGroup.POST("/api/auth/update_access_token", rx.WrapHandler(UpdateAccessToken))
+		tokenGroup.POST("/api/auth/logout_access_token", rx.WrapHandler(LogoutAccessToken))
+	}
 
-	router.POST("/api/auth/get_refresh_token", rx.WrapHandler(GetRefreshToken))
-	router.POST("/api/auth/update_refresh_token", rx.WrapHandler(UpdateRefreshToken))
-	router.POST("/api/auth/logout_refresh_token", rx.WrapHandler(LogoutRefreshToken))
+	refreshGroup := router.Group("")
+	refreshGroup.Use(middleware.CredentialAccessControlMiddleware())
+	{
+		refreshGroup.POST("/api/auth/get_refresh_token", rx.WrapHandler(GetRefreshToken))
+		refreshGroup.POST("/api/auth/update_refresh_token", rx.WrapHandler(UpdateRefreshToken))
+		refreshGroup.POST("/api/auth/logout_refresh_token", rx.WrapHandler(LogoutRefreshToken))
+	}
 }
 
 // GetAccessToken 接口：通过 refreshToken 来生成一个可用的 accessToken, 但是同时也会导致其他的 accessToken 失效
 func GetAccessToken(r *rx.Context) {
+	user, err := mbic.GetMBICUser(r.Context)
+	if err != nil {
+		r.Finish(http.StatusUnauthorized, &rx.R{
+			Code:    biz.BizUnauthorized,
+			Message: biz.BizMessage(biz.BizUnauthorized),
+			Data:    nil,
+		})
+		return
+	}
+
+	// 生成新 Token（复用 GetAccessToken 逻辑）
+	newAccessToken, _ := auth.GenerateAccessToken(fmt.Sprint(user.UserID))
+	storage.MemoCache.Set(newAccessToken, fmt.Sprint(user.UserID))
+
+	r.Finish(http.StatusOK, &rx.R{
+		Code:    biz.BizSuccess,
+		Message: biz.BizMessage(biz.BizSuccess),
+		Data:    newAccessToken,
+	})
+}
+
+// UpdateAccessToken 接口：更新 accessToken 并保证其他 accessToken 失效
+func UpdateAccessToken(r *rx.Context) {
+	// TODO: 需要携带旧的 refreshToken
 	authorization := r.GetHeader("Authorization")
 
 	refreshToken, err := common.ParseBearerAuthorizationToken(authorization)
@@ -50,7 +85,7 @@ func GetAccessToken(r *rx.Context) {
 	}
 
 	// 验证 Refresh Token 有效性
-	claims, err := jwt.VerifyRefershToken(refreshToken)
+	claims, err := auth.VerifyRefershToken(refreshToken)
 	if err != nil {
 
 		fmt.Println(err.Error())
@@ -76,40 +111,8 @@ func GetAccessToken(r *rx.Context) {
 	}
 
 	// 生成新 Token（复用 GetAccessToken 逻辑）
-	newAccessToken, _ := jwt.GenerateAccessToken(claims.UserId)
-
-	r.Finish(http.StatusOK, &rx.R{
-		Code:    biz.BizSuccess,
-		Message: biz.BizMessage(biz.BizSuccess),
-		Data:    newAccessToken,
-	})
-}
-
-func UpdateAccessToken(r *rx.Context) {
-	// TODO: 需要携带旧的 AccessToken
-	refreshToken := r.GetHeader("Authorization")
-	if refreshToken == "" {
-		r.Finish(http.StatusUnauthorized, &rx.R{
-			Code:    biz.BizRefreshTokenInvalid,
-			Message: biz.BizMessage(biz.BizRefreshTokenInvalid),
-			Data:    nil,
-		})
-		return
-	}
-
-	// 验证 Refresh Token 有效性
-	claims, err := jwt.VerifyRefershToken(refreshToken)
-	if err != nil {
-		r.Finish(http.StatusUnauthorized, &rx.R{
-			Code:    biz.BizRefreshTokenInvalid,
-			Message: biz.BizMessage(biz.BizRefreshTokenInvalid),
-			Data:    nil,
-		})
-		return
-	}
-
-	// 生成新 Token（复用 GetAccessToken 逻辑）
-	newAccessToken, _ := jwt.GenerateAccessToken(claims.UserId)
+	newAccessToken, _ := auth.GenerateAccessToken(claims.UserId)
+	storage.MemoCache.Set(newAccessToken, fmt.Sprint(user.UserID))
 
 	r.Finish(http.StatusOK, &rx.R{
 		Code:    biz.BizSuccess,

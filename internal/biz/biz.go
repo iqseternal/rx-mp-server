@@ -24,6 +24,8 @@ const (
 	BizAccessTokenInvalid  = -2002
 	BizRefreshTokenInvalid = -2003
 	BizDatabaseQueryError  = -2004
+	BizAccessTokenExpired  = -2005
+	BizRefreshTokenExpired = -2006
 
 	// 业务化状态码: >1000
 	BizUserNotHasAdminRole = 1001
@@ -33,20 +35,26 @@ var bizMessage = map[int]string{
 	BizSuccess: "",
 	BizFailure: "",
 
+	// 400 状态码内置
 	BizUnauthorized:    http.StatusText(BizUnauthorized),
 	BizForbidden:       http.StatusText(BizForbidden),
 	BizRequestTimeout:  http.StatusText(BizRequestTimeout),
 	BizMehodNotAllowed: http.StatusText(BizMehodNotAllowed),
 
+	// 500 状态码
 	BizInternalServerError: http.StatusText(BizInternalServerError),
 	BizNotImplemented:      http.StatusText(BizNotImplemented),
 	BizBadGateway:          http.StatusText(BizBadGateway),
 
+	// 错误化状态码：< -1000
 	BizBearerAuthorizationInvalid: "Bearer Authorization Invalid",
-	BizAccessTokenInvalid:         "AccessToken is not valid",
-	BizRefreshTokenInvalid:        "RefreshToken is not valid",
+	BizAccessTokenInvalid:         "AccessToken Invalid",
+	BizRefreshTokenInvalid:        "RefreshToken Invalid",
 	BizDatabaseQueryError:         "database query error",
+	BizAccessTokenExpired:         "AccessToken expired",
+	BizRefreshTokenExpired:        "RefreshToken expired",
 
+	// 业务化状态码: >1000
 	BizUserNotHasAdminRole: "User does not have admin role",
 }
 

@@ -10,11 +10,11 @@ import (
 func Run() {
 	gin.SetMode(gin.DebugMode)
 
-	r := gin.New()
+	engine := gin.New()
 
-	router.InitRouter(r)
+	router.InitRouter(engine)
 
-	err := r.Run(":" + config.Http.Port)
+	err := engine.Run(":" + config.Http.Port)
 
 	if err != nil {
 		panic("启动失败")

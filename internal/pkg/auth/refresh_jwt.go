@@ -1,9 +1,11 @@
-package jwt
+package auth
 
 import (
 	"fmt"
 	"rx-mp/internal/constants"
 	"time"
+
+	pkg_jwt "rx-mp/internal/pkg/jwt"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -26,7 +28,7 @@ func GenerateRefershToken(user_id string) (string, error) {
 		},
 	})
 
-	secret, err := ParseECDSAPemToPrivateKey(constants.RefreshJwtPrivateSecret)
+	secret, err := pkg_jwt.ParseECDSAPemToPrivateKey(constants.RefreshJwtPrivateSecret)
 	if err != nil {
 		return "", err
 	}
@@ -45,7 +47,7 @@ func VerifyRefershToken(tokenString string) (*RefreshJwtClaims, error) {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		secret, err := ParseECDSAPemToPublicKey(constants.RefreshJwtPublicSecret)
+		secret, err := pkg_jwt.ParseECDSAPemToPublicKey(constants.RefreshJwtPublicSecret)
 		if err != nil {
 			return nil, err
 		}

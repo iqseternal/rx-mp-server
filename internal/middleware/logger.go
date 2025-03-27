@@ -2,13 +2,14 @@ package middleware
 
 import (
 	"fmt"
+	"os"
+	"path"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
-	"os"
-	"path"
-	"time"
 )
 
 func LoggerToFile() gin.HandlerFunc {
