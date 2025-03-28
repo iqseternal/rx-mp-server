@@ -15,6 +15,7 @@ type RefreshJwtClaims struct {
 	*jwt.RegisteredClaims
 }
 
+// GenerateRefershToken 生成 RefreshToken
 func GenerateRefershToken(user_id string) (string, error) {
 	tokenStruct := jwt.NewWithClaims(jwt.SigningMethodES256, RefreshJwtClaims{
 		UserId: user_id,

@@ -29,6 +29,8 @@ const (
 
 	// 业务化状态码: >1000
 	BizUserNotHasAdminRole = 1001
+
+	BizUserNotExists = 1010
 )
 
 var bizMessage = map[int]string{
@@ -48,11 +50,12 @@ var bizMessage = map[int]string{
 
 	// 错误化状态码：< -1000
 	BizBearerAuthorizationInvalid: "Bearer Authorization Invalid",
-	BizAccessTokenInvalid:         "AccessToken Invalid",
-	BizRefreshTokenInvalid:        "RefreshToken Invalid",
-	BizDatabaseQueryError:         "database query error",
-	BizAccessTokenExpired:         "AccessToken expired",
-	BizRefreshTokenExpired:        "RefreshToken expired",
+
+	BizAccessTokenInvalid:  "AccessToken Invalid",
+	BizRefreshTokenInvalid: "RefreshToken Invalid",
+	BizDatabaseQueryError:  "database query error",
+	BizAccessTokenExpired:  "AccessToken expired",
+	BizRefreshTokenExpired: "RefreshToken expired",
 
 	// 业务化状态码: >1000
 	BizUserNotHasAdminRole: "User does not have admin role",

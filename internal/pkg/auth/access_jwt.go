@@ -42,12 +42,12 @@ func GenerateAccessToken(user_id string) (string, error) {
 }
 
 func VerifyAccessToken(tokenString string) (*AccessJwtClaims, error) {
-	tokenObj, err := jwt.ParseWithClaims(tokenString, &RefreshJwtClaims{}, func(token *jwt.Token) (interface{}, error) {
+	tokenObj, err := jwt.ParseWithClaims(tokenString, &AccessJwtClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodECDSA); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		secret, err := pkg_jwt.ParseECDSAPemToPublicKey(constants.RefreshJwtPublicSecret)
+		secret, err := pkg_jwt.ParseECDSAPemToPublicKey(constants.AccessJwtPublicSecret)
 		if err != nil {
 			return nil, err
 		}
@@ -69,7 +69,7 @@ func VerifyAccessToken(tokenString string) (*AccessJwtClaims, error) {
 		return nil, fmt.Errorf("invalid claims type")
 	}
 
-	if claims.Issuer != constants.RefreshJwtIssuer {
+	if claims.Issuer != constants.AccessJwtIssuer {
 		return nil, fmt.Errorf("invalid issuer")
 	}
 

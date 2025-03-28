@@ -37,13 +37,13 @@ func ResourceAccessControlMiddleware() gin.HandlerFunc {
 		if err != nil {
 			claims, err := auth.VerifyAccessToken(accessToken)
 			if err != nil {
-				c.FailWithCode(biz.BizAccessTokenInvalid, nil)
+				c.FailWithCode(biz.BizBearerAuthorizationInvalid, nil)
 				c.Abort()
 				return
 			}
 
 			if time.Now().Unix() > claims.ExpiresAt.Unix() {
-				c.FailWithCode(biz.BizAccessTokenExpired, nil)
+				c.FailWithCode(biz.BizBearerAuthorizationInvalid, nil)
 				c.Abort()
 				return
 			}
@@ -54,8 +54,8 @@ func ResourceAccessControlMiddleware() gin.HandlerFunc {
 		result := storage.RdPostgress.Where("user_id=?", userId).First(&user)
 		if result.Error != nil {
 			c.Finish(http.StatusUnauthorized, &rx.R{
-				Code:    biz.BizRefreshTokenInvalid,
-				Message: biz.BizMessage(biz.BizRefreshTokenInvalid),
+				Code:    biz.BizUserNotExists,
+				Message: biz.BizMessage(biz.BizUserNotExists),
 				Data:    nil,
 			})
 			c.Abort()
@@ -89,8 +89,8 @@ func CredentialAccessControlMiddleware() gin.HandlerFunc {
 		result := storage.RdPostgress.Where("refresh_token=?", refreshToken).First(&user)
 		if result.Error != nil {
 			c.Finish(http.StatusUnauthorized, &rx.R{
-				Code:    biz.BizRefreshTokenInvalid,
-				Message: biz.BizMessage(biz.BizRefreshTokenInvalid),
+				Code:    biz.BizBearerAuthorizationInvalid,
+				Message: biz.BizMessage(biz.BizBearerAuthorizationInvalid),
 				Data:    nil,
 			})
 			c.Abort()
@@ -101,8 +101,8 @@ func CredentialAccessControlMiddleware() gin.HandlerFunc {
 		claims, err := auth.VerifyRefershToken(refreshToken)
 		if err != nil {
 			c.Finish(http.StatusUnauthorized, &rx.R{
-				Code:    biz.BizRefreshTokenInvalid,
-				Message: biz.BizMessage(biz.BizRefreshTokenInvalid),
+				Code:    biz.BizBearerAuthorizationInvalid,
+				Message: biz.BizMessage(biz.BizBearerAuthorizationInvalid),
 				Data:    nil,
 			})
 			c.Abort()
@@ -110,7 +110,7 @@ func CredentialAccessControlMiddleware() gin.HandlerFunc {
 		}
 
 		if time.Now().Unix() > claims.ExpiresAt.Unix() {
-			c.FailWithCode(biz.BizRefreshTokenExpired, nil)
+			c.FailWithCode(biz.BizBearerAuthorizationInvalid, nil)
 			c.Abort()
 			return
 		}
