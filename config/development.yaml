@@ -3,21 +3,21 @@ app:
   version: '1.0.0'
 
 http:
-  port: '8080'
+  port: '3000'
 
 logger:
   log_level: 'debug'
   rollbar_env: 'go-clean-template'
 
 postgres:
-  host: ''
-  user: ''
-  password: ''
-  dbname: ''
-  port:
+  host: 'oupro.cn'
+  user: 'postgres'
+  password: 'postgres'
+  dbname: 'rapid'
+  port: 58063
   ssl_mode: 'disable'
   time_zone: 'Asia/Shanghai'
 
-rabbitmq:
-  rpc_server_exchange: 'rpc_server'
-  rpc_client_exchange: 'rpc_client'
+rd_redis:
+  addr: 'oupro.cn:6379'
+  password: 'liniyuanqu'

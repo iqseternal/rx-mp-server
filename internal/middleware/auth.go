@@ -18,9 +18,11 @@ import (
 func ResourceAccessControlMiddleware() gin.HandlerFunc {
 
 	return rx.WrapHandler(func(c *rx.Context) {
-		authorization := c.Request.Header.Get("Authorization")
 
-		accessToken, err := common.ParseBearerAuthorizationToken(authorization)
+		accessAuthorization, err := c.Request.Cookie("access_token")
+
+		// authorization := c.Request.Header.Get("Authorization")
+		// accessToken, err := common.ParseBearerAuthorizationToken(authorization)
 		if err != nil {
 			c.Finish(biz.BizUnauthorized, &rx.R{
 				Code: biz.BizUnauthorized,
@@ -31,6 +33,8 @@ func ResourceAccessControlMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+
+		accessToken := accessAuthorization.Value
 
 		var user *rd_client.User
 		userId, err := storage.MemoCache.Get(accessToken)
