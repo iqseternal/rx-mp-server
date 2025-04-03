@@ -1,11 +1,20 @@
 package rx
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+)
+
+// WrapWithRXContext 手动包裹 context, 获得符合 rx 的 context
+func WrapWithRXContext(c *gin.Context) *Context {
+
+	return &Context{
+		Context: c,
+	}
+}
 
 // WrapHandler 包裹处理请求的回调, 会转换 context, 使其具有自定义的方法
 func WrapHandler(handler func(c *Context)) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		ctx := &Context{Context: c}
-		handler(ctx)
+		handler(WrapWithRXContext(c))
 	}
 }

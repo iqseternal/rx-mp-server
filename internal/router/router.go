@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"rx-mp/internal/controller/api"
 	"rx-mp/internal/controller/api/auth"
-	v1 "rx-mp/internal/controller/api/v1"
+	v1_user "rx-mp/internal/controller/api/v1/user"
 	"rx-mp/internal/middleware"
 	"rx-mp/internal/pkg/rx"
 
@@ -31,7 +31,7 @@ func InitRouter(router *gin.Engine) {
 	auth.RegisterAuthController(router)
 	api.RegisterRootController(router)
 
-	v1.RegisterUserController(router)
+	v1_user.RegisterUserController(router)
 }
 
 func noMethod(c *rx.Context) {
