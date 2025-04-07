@@ -5,7 +5,7 @@ import (
 	"rx-mp/internal/constants"
 	"time"
 
-	pkg_jwt "rx-mp/internal/pkg/jwt"
+	pkgjwt "rx-mp/internal/pkg/jwt"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -15,21 +15,21 @@ type RefreshJwtClaims struct {
 	*jwt.RegisteredClaims
 }
 
-// GenerateRefershToken 生成 RefreshToken
-func GenerateRefershToken(user_id string) (string, error) {
-	tokenStruct := jwt.NewWithClaims(jwt.SigningMethodES256, RefreshJwtClaims{
-		UserId: user_id,
+// GenerateRefreshToken 生成 RefreshToken
+func GenerateRefreshToken(userId string) (string, error) {
+	tokenStruct := jwt.NewWithClaims(constants.RefreshJwtSigningMethod, RefreshJwtClaims{
+		UserId: userId,
 		RegisteredClaims: &jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(constants.RefreshJwtExpire)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
 			Issuer:    constants.RefreshJwtIssuer,
-			ID:        user_id,
+			ID:        userId,
 			Audience:  []string{},
 		},
 	})
 
-	secret, err := pkg_jwt.ParseECDSAPemToPrivateKey(constants.RefreshJwtPrivateSecret)
+	secret, err := pkgjwt.ParseECDSAPemToPrivateKey(constants.RefreshJwtPrivateSecret)
 	if err != nil {
 		return "", err
 	}
@@ -42,13 +42,13 @@ func GenerateRefershToken(user_id string) (string, error) {
 	return token, nil
 }
 
-func VerifyRefershToken(tokenString string) (*RefreshJwtClaims, error) {
+func VerifyRefreshToken(tokenString string) (*RefreshJwtClaims, error) {
 	tokenObj, err := jwt.ParseWithClaims(tokenString, &RefreshJwtClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodECDSA); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		secret, err := pkg_jwt.ParseECDSAPemToPublicKey(constants.RefreshJwtPublicSecret)
+		secret, err := pkgjwt.ParseECDSAPemToPublicKey(constants.RefreshJwtPublicSecret)
 		if err != nil {
 			return nil, err
 		}

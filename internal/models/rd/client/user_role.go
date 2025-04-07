@@ -1,4 +1,4 @@
-package rd_client
+package rdclient
 
 // UserRole 角色表
 type UserRole struct {

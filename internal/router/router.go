@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"rx-mp/internal/controller/api"
 	"rx-mp/internal/controller/api/auth"
-	v1_user "rx-mp/internal/controller/api/v1/user"
+	v1user "rx-mp/internal/controller/api/v1/user"
 	"rx-mp/internal/middleware"
 	"rx-mp/internal/pkg/rx"
 
@@ -20,7 +20,7 @@ func InitRouter(router *gin.Engine) {
 	}
 
 	router.Use(middleware.RecoveryMiddleware())
-	router.Use(middleware.Cors())
+	router.Use(middleware.CorsMiddleware())
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 
@@ -31,7 +31,7 @@ func InitRouter(router *gin.Engine) {
 	auth.RegisterAuthController(router)
 	api.RegisterRootController(router)
 
-	v1_user.RegisterUserController(router)
+	v1user.RegisterUserController(router)
 }
 
 func noMethod(c *rx.Context) {

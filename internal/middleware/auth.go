@@ -1,9 +1,10 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"rx-mp/internal/biz"
-	rd_client "rx-mp/internal/models/rd/client"
+	"rx-mp/internal/models/rd/client"
 	"rx-mp/internal/pkg/auth"
 	"rx-mp/internal/pkg/common"
 	"rx-mp/internal/pkg/mbic"
@@ -18,17 +19,14 @@ import (
 func ResourceAccessControlMiddleware() gin.HandlerFunc {
 
 	return rx.WrapHandler(func(c *rx.Context) {
-
 		accessAuthorization, err := c.Request.Cookie("access_token")
 
-		// authorization := c.Request.Header.Get("Authorization")
-		// accessToken, err := common.ParseBearerAuthorizationToken(authorization)
 		if err != nil {
-			c.Finish(biz.BizUnauthorized, &rx.R{
-				Code: biz.BizUnauthorized,
+			c.Finish(biz.Unauthorized, &rx.R{
+				Code: biz.Unauthorized,
 				Data: nil,
 
-				Message: biz.BizMessage(biz.BizUnauthorized),
+				Message: biz.Message(biz.Unauthorized),
 			})
 			c.Abort()
 			return
@@ -36,18 +34,18 @@ func ResourceAccessControlMiddleware() gin.HandlerFunc {
 
 		accessToken := accessAuthorization.Value
 
-		var user *rd_client.User
+		var user *rdclient.User
 		userId, err := storage.MemoCache.Get(accessToken)
 		if err != nil {
 			claims, err := auth.VerifyAccessToken(accessToken)
 			if err != nil {
-				c.FailWithCode(biz.BizBearerAuthorizationInvalid, nil)
+				c.FailWithCode(biz.BearerAuthorizationInvalid, nil)
 				c.Abort()
 				return
 			}
 
 			if time.Now().Unix() > claims.ExpiresAt.Unix() {
-				c.FailWithCode(biz.BizBearerAuthorizationInvalid, nil)
+				c.FailWithCode(biz.BearerAuthorizationInvalid, nil)
 				c.Abort()
 				return
 			}
@@ -55,11 +53,11 @@ func ResourceAccessControlMiddleware() gin.HandlerFunc {
 			userId = claims.UserId
 		}
 
-		result := storage.RdPostgress.Where("user_id=?", userId).First(&user)
+		result := storage.RdPostgres.Where("user_id=?", userId).First(&user)
 		if result.Error != nil {
 			c.Finish(http.StatusUnauthorized, &rx.R{
-				Code:    biz.BizUserNotExists,
-				Message: biz.BizMessage(biz.BizUserNotExists),
+				Code:    biz.UserNotExists,
+				Message: biz.Message(biz.UserNotExists),
 				Data:    nil,
 			})
 			c.Abort()
@@ -80,21 +78,21 @@ func CredentialAccessControlMiddleware() gin.HandlerFunc {
 
 		refreshToken, err := common.ParseBearerAuthorizationToken(authorization)
 		if err != nil {
-			c.Finish(biz.BizUnauthorized, &rx.R{
-				Code:    biz.BizUnauthorized,
+			c.Finish(biz.Unauthorized, &rx.R{
+				Code:    biz.Unauthorized,
 				Data:    nil,
-				Message: biz.BizMessage(biz.BizUnauthorized),
+				Message: biz.Message(biz.Unauthorized),
 			})
 			c.Abort()
 			return
 		}
 
-		var user *rd_client.User
-		result := storage.RdPostgress.Where("refresh_token=?", refreshToken).First(&user)
+		var user *rdclient.User
+		result := storage.RdPostgres.Where("refresh_token=?", refreshToken).First(&user)
 		if result.Error != nil {
 			c.Finish(http.StatusUnauthorized, &rx.R{
-				Code:    biz.BizBearerAuthorizationInvalid,
-				Message: biz.BizMessage(biz.BizBearerAuthorizationInvalid),
+				Code:    biz.BearerAuthorizationInvalid,
+				Message: biz.Message(biz.BearerAuthorizationInvalid),
 				Data:    nil,
 			})
 			c.Abort()
@@ -102,11 +100,11 @@ func CredentialAccessControlMiddleware() gin.HandlerFunc {
 		}
 
 		// 验证 Refresh Token 有效性
-		claims, err := auth.VerifyRefershToken(refreshToken)
+		claims, err := auth.VerifyRefreshToken(refreshToken)
 		if err != nil {
 			c.Finish(http.StatusUnauthorized, &rx.R{
-				Code:    biz.BizBearerAuthorizationInvalid,
-				Message: biz.BizMessage(biz.BizBearerAuthorizationInvalid),
+				Code:    biz.BearerAuthorizationInvalid,
+				Message: biz.Message(biz.BearerAuthorizationInvalid),
 				Data:    nil,
 			})
 			c.Abort()
@@ -114,13 +112,13 @@ func CredentialAccessControlMiddleware() gin.HandlerFunc {
 		}
 
 		if time.Now().Unix() > claims.ExpiresAt.Unix() {
-			c.FailWithCode(biz.BizBearerAuthorizationInvalid, nil)
+			c.FailWithCode(biz.BearerAuthorizationInvalid, nil)
 			c.Abort()
 			return
 		}
 
-		c.Set(mbic.MBICUser, user)
-		c.Set(mbic.MBICUserID, user.UserID)
+		mbic.SetMBICUser(c.Context, user)
+		mbic.SetMBICUserID(c.Context, fmt.Sprint(user.UserID))
 		c.Next()
 	})
 }

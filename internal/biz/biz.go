@@ -2,67 +2,73 @@ package biz
 
 import "net/http"
 
+// 预定义, 通常情况下, 0 => 表示成功, 其余表示错误或者异常行为
 const (
-	// 预定义, 通常情况下, 0 => 表示成功, 其余表示错误或者异常行为
-	BizSuccess = 0
-	BizFailure = -1
+	Success = 0
+	Failure = -1
+)
 
-	// 400 +
-	BizUnauthorized    = http.StatusUnauthorized
-	BizForbidden       = http.StatusForbidden
-	BizRequestTimeout  = http.StatusRequestTimeout
-	BizMehodNotAllowed = http.StatusMethodNotAllowed
+// 400 +
+const (
+	Unauthorized     = http.StatusUnauthorized
+	Forbidden        = http.StatusForbidden
+	RequestTimeout   = http.StatusRequestTimeout
+	MethodNotAllowed = http.StatusMethodNotAllowed
+)
 
-	// 500 +
-	BizInternalServerError = http.StatusInternalServerError
-	BizNotImplemented      = http.StatusNotImplemented
-	BizBadGateway          = http.StatusBadGateway
+// 500 +
+const (
+	InternalServerError = http.StatusInternalServerError
+	NotImplemented      = http.StatusNotImplemented
+	BadGateway          = http.StatusBadGateway
+)
 
-	// 错误化状态码：< -1000
-	BizBearerAuthorizationInvalid = -1001
+// 错误化状态码：< -1000
+const (
+	BearerAuthorizationInvalid = -1001
+	AccessTokenInvalid         = -2002
+	RefreshTokenInvalid        = -2003
+	DatabaseQueryError         = -2004
+	AccessTokenExpired         = -2005
+	RefreshTokenExpired        = -2006
+)
 
-	BizAccessTokenInvalid  = -2002
-	BizRefreshTokenInvalid = -2003
-	BizDatabaseQueryError  = -2004
-	BizAccessTokenExpired  = -2005
-	BizRefreshTokenExpired = -2006
-
-	// 业务化状态码: >1000
-	BizUserNotHasAdminRole = 1001
-
-	BizUserNotExists = 1010
+// 业务化状态码: >1000
+const (
+	UserNotHasAdminRole = 1001
+	UserNotExists       = 1010
 )
 
 var bizMessage = map[int]string{
-	BizSuccess: "",
-	BizFailure: "",
+	Success: "",
+	Failure: "",
 
 	// 400 状态码内置
-	BizUnauthorized:    http.StatusText(BizUnauthorized),
-	BizForbidden:       http.StatusText(BizForbidden),
-	BizRequestTimeout:  http.StatusText(BizRequestTimeout),
-	BizMehodNotAllowed: http.StatusText(BizMehodNotAllowed),
+	Unauthorized:     http.StatusText(Unauthorized),
+	Forbidden:        http.StatusText(Forbidden),
+	RequestTimeout:   http.StatusText(RequestTimeout),
+	MethodNotAllowed: http.StatusText(MethodNotAllowed),
 
 	// 500 状态码
-	BizInternalServerError: http.StatusText(BizInternalServerError),
-	BizNotImplemented:      http.StatusText(BizNotImplemented),
-	BizBadGateway:          http.StatusText(BizBadGateway),
+	InternalServerError: http.StatusText(InternalServerError),
+	NotImplemented:      http.StatusText(NotImplemented),
+	BadGateway:          http.StatusText(BadGateway),
 
 	// 错误化状态码：< -1000
-	BizBearerAuthorizationInvalid: "Bearer Authorization Invalid",
+	BearerAuthorizationInvalid: "Bearer Authorization Invalid",
 
-	BizAccessTokenInvalid:  "AccessToken Invalid",
-	BizRefreshTokenInvalid: "RefreshToken Invalid",
-	BizDatabaseQueryError:  "database query error",
-	BizAccessTokenExpired:  "AccessToken expired",
-	BizRefreshTokenExpired: "RefreshToken expired",
+	AccessTokenInvalid:  "AccessToken Invalid",
+	RefreshTokenInvalid: "RefreshToken Invalid",
+	DatabaseQueryError:  "database query error",
+	AccessTokenExpired:  "AccessToken expired",
+	RefreshTokenExpired: "RefreshToken expired",
 
 	// 业务化状态码: >1000
-	BizUserNotHasAdminRole: "User does not have admin role",
+	UserNotHasAdminRole: "User does not have admin role",
 }
 
-// BizMessage 获取预定义状态码内置的错误消息返回
-func BizMessage(code int) *string {
+// Message 获取预定义状态码内置的错误消息返回
+func Message(code int) *string {
 
 	text := bizMessage[code]
 

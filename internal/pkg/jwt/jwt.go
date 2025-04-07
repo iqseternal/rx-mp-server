@@ -12,9 +12,9 @@ import (
 )
 
 // GenerateSecretPair 生成密钥对
-func GenerateSecretPair() (string, string, error) {
-	// 1. 生成私钥（P-256曲线）
-	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+func GenerateSecretPair(c elliptic.Curve) (string, string, error) {
+	// 1. 生成私钥
+	privateKey, err := ecdsa.GenerateKey(c, rand.Reader)
 	if err != nil {
 		log.Fatalf("生成私钥失败: %v", err)
 		return "", "", err
@@ -50,7 +50,7 @@ func GenerateSecretPair() (string, string, error) {
 	return string(pemPublic), string(pemPrivate), nil
 }
 
-// ParseECDSAPrivateKey 解析 ECDSA Pem 字符串的 key, 加载为 *ecdsa.PrivateKey
+// ParseECDSAPemToPrivateKey 解析 ECDSA Pem 字符串的 key, 加载为 *ecdsa.PrivateKey
 func ParseECDSAPemToPrivateKey(pemKey string) (*ecdsa.PrivateKey, error) {
 	block, _ := pem.Decode([]byte(pemKey))
 	if block == nil {

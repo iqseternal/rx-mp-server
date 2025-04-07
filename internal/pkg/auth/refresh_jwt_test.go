@@ -3,13 +3,13 @@ package auth
 import "testing"
 
 func TestVerifyRefershToken(t *testing.T) {
-	token, err := GenerateRefershToken("1")
+	token, err := GenerateRefreshToken("1")
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	claims, err := VerifyRefershToken(token)
+	claims, err := VerifyRefreshToken(token)
 
 	if err != nil {
 		t.Error(err)

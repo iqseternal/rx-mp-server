@@ -36,10 +36,10 @@ type RdRedisConfig struct {
 
 // Config -.
 type Config struct {
-	App         AppConfig        `yaml:"app"`
-	Http        HttpConfig       `yaml:"http"`
-	RdPostgress RdPostgresConfig `yaml:"postgres"`
-	RdRedis     RdRedisConfig    `yaml:"rd_redis"`
+	App        AppConfig        `yaml:"app"`
+	Http       HttpConfig       `yaml:"http"`
+	RdPostgres RdPostgresConfig `yaml:"postgres"`
+	RdRedis    RdRedisConfig    `yaml:"rd_redis"`
 }
 
 // EnvEnum 环境变量枚举配置
@@ -56,10 +56,10 @@ var Env = &EnvEnum{
 }
 
 var (
-	RdPostgress *RdPostgresConfig
-	RdRedis     *RdRedisConfig
-	App         *AppConfig
-	Http        *HttpConfig
+	RdPostgres *RdPostgresConfig
+	RdRedis    *RdRedisConfig
+	App        *AppConfig
+	Http       *HttpConfig
 )
 
 func init() {
@@ -82,7 +82,7 @@ func init() {
 			panic(err)
 		}
 
-		RdPostgress = &config.RdPostgress
+		RdPostgres = &config.RdPostgres
 		RdRedis = &config.RdRedis
 		App = &config.App
 		Http = &config.Http

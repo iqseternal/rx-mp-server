@@ -29,61 +29,61 @@ type Context struct {
 	*gin.Context
 }
 
-// Ok 成功响应快捷方法
+// Ok 成功响应快捷方法, 默认code、message
 func (c *Context) Ok(data interface{}) {
 	c.JSON(http.StatusOK, &R{
-		Code:    biz.BizSuccess,
-		Message: biz.BizMessage(biz.BizSuccess),
+		Code:    biz.Success,
+		Message: biz.Message(biz.Success),
 		Data:    data,
 	})
 }
 
-// OkWithCode
+// OkWithCode 返回成功, 默认message
 func (c *Context) OkWithCode(bizCode int, data interface{}) {
 	c.JSON(http.StatusOK, &R{
 		Code:    bizCode,
-		Message: biz.BizMessage(bizCode),
+		Message: biz.Message(bizCode),
 		Data:    data,
 	})
 }
 
-// OkWithMessage
+// OkWithMessage 返回成功, 默认code
 func (c *Context) OkWithMessage(message string, data interface{}) {
 	c.JSON(http.StatusOK, &R{
-		Code:    biz.BizSuccess,
+		Code:    biz.Success,
 		Message: &message,
 		Data:    data,
 	})
 }
 
-// Fail
+// Fail 返回失败, 默认code、message
 func (c *Context) Fail(data interface{}) {
 	c.JSON(http.StatusOK, &R{
-		Code:    biz.BizFailure,
+		Code:    biz.Failure,
 		Data:    data,
-		Message: biz.BizMessage(biz.BizFailure),
+		Message: biz.Message(biz.Failure),
 	})
 }
 
-// FailWithCode
+// FailWithCode 返回失败, 默认message
 func (c *Context) FailWithCode(bizCode int, data interface{}) {
 	c.JSON(http.StatusOK, &R{
 		Code:    bizCode,
 		Data:    data,
-		Message: biz.BizMessage(bizCode),
+		Message: biz.Message(bizCode),
 	})
 }
 
-// FailWithMessage
+// FailWithMessage 返回失败, 默认code
 func (c *Context) FailWithMessage(message string, data interface{}) {
 	c.JSON(http.StatusOK, &R{
-		Code:    biz.BizFailure,
+		Code:    biz.Failure,
 		Data:    data,
 		Message: &message,
 	})
 }
 
-// Finish
+// Finish 完成当前请求, 自定义http状态码和rx返回
 func (c *Context) Finish(httpStatus int, r *R) {
-	c.JSON(http.StatusOK, r)
+	c.JSON(httpStatus, r)
 }
