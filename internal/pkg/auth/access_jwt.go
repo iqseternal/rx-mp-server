@@ -5,7 +5,7 @@ import (
 	"rx-mp/internal/constants"
 	"time"
 
-	pkg_jwt "rx-mp/internal/pkg/jwt"
+	pkgjwt "rx-mp/internal/pkg/jwt"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -15,20 +15,20 @@ type AccessJwtClaims struct {
 	*jwt.RegisteredClaims
 }
 
-func GenerateAccessToken(user_id string) (string, error) {
-	tokenStruct := jwt.NewWithClaims(jwt.SigningMethodES256, AccessJwtClaims{
-		UserId: user_id,
+func GenerateAccessToken(userId string) (string, error) {
+	tokenStruct := jwt.NewWithClaims(constants.AccessJwtSigningMethod, AccessJwtClaims{
+		UserId: userId,
 		RegisteredClaims: &jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(constants.AccessJwtExpire)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
 			Issuer:    constants.AccessJwtIssuer,
-			ID:        user_id,
+			ID:        userId,
 			Audience:  []string{},
 		},
 	})
 
-	secret, err := pkg_jwt.ParseECDSAPemToPrivateKey(constants.AccessJwtPrivateSecret)
+	secret, err := pkgjwt.ParseECDSAPemToPrivateKey(constants.AccessJwtPrivateSecret)
 	if err != nil {
 		return "", err
 	}
@@ -42,12 +42,12 @@ func GenerateAccessToken(user_id string) (string, error) {
 }
 
 func VerifyAccessToken(tokenString string) (*AccessJwtClaims, error) {
-	tokenObj, err := jwt.ParseWithClaims(tokenString, &RefreshJwtClaims{}, func(token *jwt.Token) (interface{}, error) {
+	tokenObj, err := jwt.ParseWithClaims(tokenString, &AccessJwtClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodECDSA); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		secret, err := pkg_jwt.ParseECDSAPemToPublicKey(constants.RefreshJwtPublicSecret)
+		secret, err := pkgjwt.ParseECDSAPemToPublicKey(constants.AccessJwtPublicSecret)
 		if err != nil {
 			return nil, err
 		}
@@ -69,7 +69,7 @@ func VerifyAccessToken(tokenString string) (*AccessJwtClaims, error) {
 		return nil, fmt.Errorf("invalid claims type")
 	}
 
-	if claims.Issuer != constants.RefreshJwtIssuer {
+	if claims.Issuer != constants.AccessJwtIssuer {
 		return nil, fmt.Errorf("invalid issuer")
 	}
 

@@ -2,38 +2,37 @@ package mbic
 
 import (
 	"fmt"
-	rd_client "rx-mp/internal/models/rd/client"
-
 	"github.com/gin-gonic/gin"
+	"rx-mp/internal/models/rd/client"
 )
 
 const (
-	MBICUser   = "user"
-	MBICUserID = "user_id"
+	MBUser   = "user"
+	MBUserID = "user_id"
 )
 
-func SetMBICUser(c *gin.Context, user *rd_client.User) {
-	c.Set(MBICUser, user)
+func SetMBICUser(c *gin.Context, user *rdclient.User) {
+	c.Set(MBUser, user)
 }
 
-func GetMBICUser(c *gin.Context) (*rd_client.User, error) {
-	iuser, ihasUser := c.Get(MBICUser)
-	if !ihasUser {
-		return nil, fmt.Errorf("Not Found user with MBInc")
+func GetMBICUser(c *gin.Context) (*rdclient.User, error) {
+	iUser, iHasUser := c.Get(MBUser)
+	if !iHasUser {
+		return nil, fmt.Errorf("not Found user with MBInc")
 	}
-	user := iuser.(*rd_client.User)
+	user := iUser.(*rdclient.User)
 	return user, nil
 }
 
 func SetMBICUserID(c *gin.Context, userId string) {
-	c.Set(MBICUserID, userId)
+	c.Set(MBUserID, userId)
 }
 
 func GetMBICUserID(c *gin.Context) (int, error) {
-	iuserId, ihasUserId := c.Get(MBICUserID)
-	if !ihasUserId {
-		return -1, fmt.Errorf("Not Found user id with MBInc")
+	iUserId, iHasUserId := c.Get(MBUserID)
+	if !iHasUserId {
+		return -1, fmt.Errorf("not Found user id with MBInc")
 	}
-	user := iuserId.(int)
+	user := iUserId.(int)
 	return user, nil
 }

@@ -1,9 +1,9 @@
-package v1
+package v1_user
 
 import (
 	"log"
 	"rx-mp/internal/middleware"
-	rd_client "rx-mp/internal/models/rd/client"
+	"rx-mp/internal/models/rd/client"
 	"rx-mp/internal/pkg/auth"
 	"rx-mp/internal/pkg/common"
 	"rx-mp/internal/pkg/mbic"
@@ -44,8 +44,8 @@ func Login(c *rx.Context) {
 		return
 	}
 
-	var user rd_client.User
-	result := storage.RdPostgress.
+	var user rdclient.User
+	result := storage.RdPostgres.
 		Where("email = ?", payload.Email).
 		Limit(1).
 		First(&user)
@@ -55,21 +55,21 @@ func Login(c *rx.Context) {
 		return
 	}
 
-	accssToken, err := auth.GenerateAccessToken(fmt.Sprint(user.UserID))
+	accessToken, err := auth.GenerateAccessToken(fmt.Sprint(user.UserID))
 	if err != nil {
 		fmt.Println("生成 access token 出错", err.Error())
 		c.FailWithMessage(err.Error(), nil)
 		return
 	}
 
-	refreshToken, err := auth.GenerateRefershToken(fmt.Sprint(user.UserID))
+	refreshToken, err := auth.GenerateRefreshToken(fmt.Sprint(user.UserID))
 	if err != nil {
 		fmt.Println("生成 refresh token 出错", err.Error())
 		c.FailWithMessage(err.Error(), nil)
 		return
 	}
 
-	result = storage.RdPostgress.
+	result = storage.RdPostgres.
 		Model(&user).
 		Where("user_id=?", user.UserID).
 		Update("refresh_token", refreshToken)
@@ -80,11 +80,15 @@ func Login(c *rx.Context) {
 		return
 	}
 
-	storage.MemoCache.Set(refreshToken, fmt.Sprint(user.UserID))
+	err = storage.MemoCache.Set(refreshToken, fmt.Sprint(user.UserID))
+	if err != nil {
+		c.FailWithMessage(result.Error.Error(), nil)
+		return
+	}
 
 	c.Ok(&rx.H{
 		"tokens": &rx.H{
-			"access_token":  accssToken,
+			"access_token":  accessToken,
 			"refresh_token": refreshToken,
 		},
 	})
@@ -105,9 +109,9 @@ func Register(c *rx.Context) {
 	}
 
 	email := payload.Email
-	var user *rd_client.User
+	var user *rdclient.User
 
-	result := storage.RdPostgress.Where("email = ?", email).First(user)
+	result := storage.RdPostgres.Where("email = ?", email).First(user)
 
 	if result.Error == nil {
 		c.FailWithMessage("email is exist", nil)
@@ -124,7 +128,7 @@ func Register(c *rx.Context) {
 	password := string(hashedPassword)
 
 	// 创建用户对象
-	user = &rd_client.User{
+	user = &rdclient.User{
 		Email:    payload.Email,
 		Username: payload.Username,
 		Password: &password,
@@ -135,7 +139,7 @@ func Register(c *rx.Context) {
 		user.Username = "用户" + common.GenerateRandomHexStr(5)
 	}
 
-	result = storage.RdPostgress.Create(&user)
+	result = storage.RdPostgres.Create(&user)
 	if result.Error != nil {
 		c.FailWithMessage(result.Error.Error(), nil)
 		return

@@ -1,8 +1,8 @@
-package rd_client
+package rdclient
 
 import "time"
 
-// Group
+// Group 用户组
 type Group struct {
 	GroupId     uint      `json:"group_id"     gorm:"primaryKey;autoIncrement;not null"`
 	GroupName   string    `json:"group_name"   gorm:"type:varchar(255)"`

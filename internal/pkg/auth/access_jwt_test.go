@@ -2,14 +2,14 @@ package auth
 
 import "testing"
 
-func TestVerifyRefershToken(t *testing.T) {
-	token, err := GenerateRefreshToken("1")
+func TestVerifyAccessToken(t *testing.T) {
+	token, err := GenerateAccessToken("1")
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	claims, err := VerifyRefreshToken(token)
+	claims, err := VerifyAccessToken(token)
 
 	if err != nil {
 		t.Error(err)

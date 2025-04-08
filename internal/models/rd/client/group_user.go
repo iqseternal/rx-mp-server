@@ -1,8 +1,8 @@
-package rd_client
+package rdclient
 
 import "time"
 
-// GroupUser
+// GroupUser 用户组与用户之间的关系
 type GroupUser struct {
 	Id          uint      `json:"id"           gorm:"column:id;type:int8;primaryKey;autoIncrement;not null"`
 	GroupId     uint      `json:"group_id"     gorm:"primaryKey;not null"`

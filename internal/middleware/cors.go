@@ -5,8 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Cors 处理前端跨域的中间件
-func Cors() gin.HandlerFunc {
+// CorsMiddleware 处理前端跨域的中间件
+func CorsMiddleware() gin.HandlerFunc {
 
 	config := cors.DefaultConfig()
 

@@ -1,4 +1,4 @@
-package rd_client
+package rdclient
 
 // RolePermission 角色权限表
 type RolePermission struct {

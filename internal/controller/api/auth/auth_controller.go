@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"rx-mp/internal/biz"
 	"rx-mp/internal/middleware"
-	rd_client "rx-mp/internal/models/rd/client"
+	"rx-mp/internal/models/rd/client"
 	"rx-mp/internal/pkg/auth"
 	"rx-mp/internal/pkg/common"
 	"rx-mp/internal/pkg/mbic"
@@ -39,8 +39,8 @@ func GetAccessToken(r *rx.Context) {
 	user, err := mbic.GetMBICUser(r.Context)
 	if err != nil {
 		r.Finish(http.StatusUnauthorized, &rx.R{
-			Code:    biz.BizUnauthorized,
-			Message: biz.BizMessage(biz.BizUnauthorized),
+			Code:    biz.Unauthorized,
+			Message: biz.Message(biz.Unauthorized),
 			Data:    nil,
 		})
 		return
@@ -48,11 +48,15 @@ func GetAccessToken(r *rx.Context) {
 
 	// 生成新 Token（复用 GetAccessToken 逻辑）
 	newAccessToken, _ := auth.GenerateAccessToken(fmt.Sprint(user.UserID))
-	storage.MemoCache.Set(newAccessToken, fmt.Sprint(user.UserID))
+	err = storage.MemoCache.Set(newAccessToken, fmt.Sprint(user.UserID))
+	if err != nil {
+		r.FailWithMessage(err.Error(), nil)
+		return
+	}
 
 	r.Finish(http.StatusOK, &rx.R{
-		Code:    biz.BizSuccess,
-		Message: biz.BizMessage(biz.BizSuccess),
+		Code:    biz.Success,
+		Message: biz.Message(biz.Success),
 		Data:    newAccessToken,
 	})
 }
@@ -65,46 +69,46 @@ func UpdateAccessToken(r *rx.Context) {
 	refreshToken, err := common.ParseBearerAuthorizationToken(authorization)
 	if err != nil {
 		r.Finish(http.StatusUnauthorized, &rx.R{
-			Code:    biz.BizBearerAuthorizationInvalid,
-			Message: biz.BizMessage(biz.BizBearerAuthorizationInvalid),
+			Code:    biz.BearerAuthorizationInvalid,
+			Message: biz.Message(biz.BearerAuthorizationInvalid),
 			Data:    nil,
 		})
 		return
 	}
 
-	var user *rd_client.User
-	result := storage.RdPostgress.Where("refresh_token=?", refreshToken).First(&user)
+	var user *rdclient.User
+	result := storage.RdPostgres.Where("refresh_token=?", refreshToken).First(&user)
 
 	if result.Error != nil {
 		r.Finish(http.StatusUnauthorized, &rx.R{
-			Code:    biz.BizRefreshTokenInvalid,
-			Message: biz.BizMessage(biz.BizRefreshTokenInvalid),
+			Code:    biz.RefreshTokenInvalid,
+			Message: biz.Message(biz.RefreshTokenInvalid),
 			Data:    nil,
 		})
 		return
 	}
 
 	// 验证 Refresh Token 有效性
-	claims, err := auth.VerifyRefershToken(refreshToken)
+	claims, err := auth.VerifyRefreshToken(refreshToken)
 	if err != nil {
 
 		fmt.Println(err.Error())
 
 		// 获取到了数据, 但是解析失败了?
-		result := storage.RdPostgress.Model(&user).Where("refresh_token=?", refreshToken).Update("refresh_token", nil)
+		result := storage.RdPostgres.Model(&user).Where("refresh_token=?", refreshToken).Update("refresh_token", nil)
 
 		if result.Error != nil {
 			r.Finish(http.StatusInternalServerError, &rx.R{
-				Code:    biz.BizDatabaseQueryError,
-				Message: biz.BizMessage(biz.BizDatabaseQueryError),
+				Code:    biz.DatabaseQueryError,
+				Message: biz.Message(biz.DatabaseQueryError),
 				Data:    nil,
 			})
 			return
 		}
 
 		r.Finish(http.StatusUnauthorized, &rx.R{
-			Code:    biz.BizRefreshTokenInvalid,
-			Message: biz.BizMessage(biz.BizRefreshTokenInvalid),
+			Code:    biz.RefreshTokenInvalid,
+			Message: biz.Message(biz.RefreshTokenInvalid),
 			Data:    nil,
 		})
 		return
@@ -112,11 +116,15 @@ func UpdateAccessToken(r *rx.Context) {
 
 	// 生成新 Token（复用 GetAccessToken 逻辑）
 	newAccessToken, _ := auth.GenerateAccessToken(claims.UserId)
-	storage.MemoCache.Set(newAccessToken, fmt.Sprint(user.UserID))
+	err = storage.MemoCache.Set(newAccessToken, fmt.Sprint(user.UserID))
+	if err != nil {
+		r.FailWithMessage(err.Error(), nil)
+		return
+	}
 
 	r.Finish(http.StatusOK, &rx.R{
-		Code:    biz.BizSuccess,
-		Message: biz.BizMessage(biz.BizSuccess),
+		Code:    biz.Success,
+		Message: biz.Message(biz.Success),
 		Data:    newAccessToken,
 	})
 }
@@ -125,8 +133,8 @@ func LogoutAccessToken(r *rx.Context) {
 	accessToken := r.GetHeader("Authorization")
 	if accessToken == "" {
 		r.Finish(http.StatusBadRequest, &rx.R{
-			Code:    biz.BizAccessTokenInvalid,
-			Message: biz.BizMessage(biz.BizAccessTokenInvalid),
+			Code:    biz.AccessTokenInvalid,
+			Message: biz.Message(biz.AccessTokenInvalid),
 			Data:    nil,
 		})
 		return
@@ -143,16 +151,16 @@ func LogoutAccessToken(r *rx.Context) {
 	// }
 
 	r.Finish(http.StatusOK, &rx.R{
-		Code:    biz.BizSuccess,
-		Message: biz.BizMessage(biz.BizSuccess),
+		Code:    biz.Success,
+		Message: biz.Message(biz.Success),
 		Data:    nil,
 	})
 }
 
 func GetRefreshToken(r *rx.Context) {
 	r.Finish(http.StatusMethodNotAllowed, &rx.R{
-		Code:    biz.BizMehodNotAllowed,
-		Message: biz.BizMessage(biz.BizMehodNotAllowed),
+		Code:    biz.MethodNotAllowed,
+		Message: biz.Message(biz.MethodNotAllowed),
 		Data:    nil,
 	})
 
@@ -161,8 +169,8 @@ func GetRefreshToken(r *rx.Context) {
 
 func UpdateRefreshToken(r *rx.Context) {
 	r.Finish(http.StatusMethodNotAllowed, &rx.R{
-		Code:    biz.BizMehodNotAllowed,
-		Message: biz.BizMessage(biz.BizMehodNotAllowed),
+		Code:    biz.MethodNotAllowed,
+		Message: biz.Message(biz.MethodNotAllowed),
 		Data:    nil,
 	})
 	r.Abort()
@@ -170,8 +178,8 @@ func UpdateRefreshToken(r *rx.Context) {
 
 func LogoutRefreshToken(r *rx.Context) {
 	r.Finish(http.StatusMethodNotAllowed, &rx.R{
-		Code:    biz.BizMehodNotAllowed,
-		Message: biz.BizMessage(biz.BizMehodNotAllowed),
+		Code:    biz.MethodNotAllowed,
+		Message: biz.Message(biz.MethodNotAllowed),
 		Data:    nil,
 	})
 	r.Abort()

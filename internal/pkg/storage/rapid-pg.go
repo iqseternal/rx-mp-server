@@ -9,18 +9,18 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-var RdPostgress *gorm.DB
+var RdPostgres *gorm.DB
 
 func init() {
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=%s",
-		config.RdPostgress.Host,
-		config.RdPostgress.User,
-		config.RdPostgress.Password,
-		config.RdPostgress.DbName,
-		config.RdPostgress.Port,
-		config.RdPostgress.SslMode,
-		config.RdPostgress.TimeZone,
+		config.RdPostgres.Host,
+		config.RdPostgres.User,
+		config.RdPostgres.Password,
+		config.RdPostgres.DbName,
+		config.RdPostgres.Port,
+		config.RdPostgres.SslMode,
+		config.RdPostgres.TimeZone,
 	)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
@@ -32,7 +32,7 @@ func init() {
 
 	//refactoring(db)
 
-	RdPostgress = db
+	RdPostgres = db
 }
 
 // refactoringRdClient 重新建立 rapid.client 表结构
