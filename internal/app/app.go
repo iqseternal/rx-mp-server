@@ -1,10 +1,9 @@
 package app
 
 import (
-	"rx-mp/config"
-	"rx-mp/internal/router"
-
 	"github.com/gin-gonic/gin"
+	"rx-mp/config"
+	"rx-mp/internal/controller"
 )
 
 func Run() {
@@ -12,7 +11,7 @@ func Run() {
 
 	engine := gin.New()
 
-	router.InitRouter(engine)
+	controller.InitRouter(engine)
 
 	err := engine.Run(":" + config.Http.Port)
 
