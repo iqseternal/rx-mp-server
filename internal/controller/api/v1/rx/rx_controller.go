@@ -17,7 +17,7 @@ func RegisterRXController(router *gin.Engine) {
 		routerGroup.POST("/api/v1/rx/add_extension", rx.WrapHandler(AddExtension))
 		routerGroup.POST("/api/v1/rx/remove_extension", rx.WrapHandler(RemoveExtension))
 		routerGroup.POST("/api/v1/rx/active_extension", rx.WrapHandler(ActiveExtension))
-		routerGroup.POST("/api/v1/rx/deactive_extension", rx.WrapHandler(DeactiveExtension))
+		routerGroup.POST("/api/v1/rx/deactivate_extension", rx.WrapHandler(DeactivateExtension))
 	}
 }
 
@@ -37,6 +37,6 @@ func ActiveExtension(c *rx.Context) {
 
 }
 
-func DeactiveExtension(c *rx.Context) {
+func DeactivateExtension(c *rx.Context) {
 
 }
