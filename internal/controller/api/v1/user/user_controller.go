@@ -1,4 +1,4 @@
-package v1_user
+package v1User
 
 import (
 	"log"

@@ -1,11 +1,12 @@
-package router
+package controller
 
 import (
 	"fmt"
 	"net/http"
 	"rx-mp/internal/controller/api"
 	"rx-mp/internal/controller/api/auth"
-	v1user "rx-mp/internal/controller/api/v1/user"
+	"rx-mp/internal/controller/api/v1/rx"
+	"rx-mp/internal/controller/api/v1/user"
 	"rx-mp/internal/middleware"
 	"rx-mp/internal/pkg/rx"
 
@@ -31,7 +32,8 @@ func InitRouter(router *gin.Engine) {
 	auth.RegisterAuthController(router)
 	api.RegisterRootController(router)
 
-	v1user.RegisterUserController(router)
+	v1User.RegisterUserController(router)
+	v1RX.RegisterRXController(router)
 }
 
 func noMethod(c *rx.Context) {
