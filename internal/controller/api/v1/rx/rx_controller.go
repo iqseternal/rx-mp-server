@@ -30,13 +30,25 @@ func AddExtension(c *rx.Context) {
 }
 
 func RemoveExtension(c *rx.Context) {
-
+	c.Finish(http.StatusMethodNotAllowed, &rx.R{
+		Code:    biz.NotImplemented,
+		Message: biz.Message(biz.NotImplemented),
+		Data:    nil,
+	})
 }
 
 func ActiveExtension(c *rx.Context) {
-
+	c.Finish(http.StatusMethodNotAllowed, &rx.R{
+		Code:    biz.NotImplemented,
+		Message: biz.Message(biz.NotImplemented),
+		Data:    nil,
+	})
 }
 
 func DeactiveExtension(c *rx.Context) {
-
+	c.Finish(http.StatusMethodNotAllowed, &rx.R{
+		Code:    biz.NotImplemented,
+		Message: biz.Message(biz.NotImplemented),
+		Data:    nil,
+	})
 }

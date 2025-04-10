@@ -26,11 +26,13 @@ const (
 // 错误化状态码：< -1000
 const (
 	BearerAuthorizationInvalid = -1001
-	AccessTokenInvalid         = -2002
-	RefreshTokenInvalid        = -2003
-	DatabaseQueryError         = -2004
-	AccessTokenExpired         = -2005
-	RefreshTokenExpired        = -2006
+	UnknownOrigin              = -1002
+
+	AccessTokenInvalid  = -2002
+	RefreshTokenInvalid = -2003
+	DatabaseQueryError  = -2004
+	AccessTokenExpired  = -2005
+	RefreshTokenExpired = -2006
 )
 
 // 业务化状态码: >1000
@@ -56,6 +58,7 @@ var bizMessage = map[int]string{
 
 	// 错误化状态码：< -1000
 	BearerAuthorizationInvalid: "Bearer Authorization Invalid",
+	UnknownOrigin:              "Unknown Origin",
 
 	AccessTokenInvalid:  "AccessToken Invalid",
 	RefreshTokenInvalid: "RefreshToken Invalid",

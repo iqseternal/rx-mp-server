@@ -38,6 +38,11 @@ func (c *Context) Ok(data interface{}) {
 	})
 }
 
+func (c *Context) AbortWithOk(data interface{}) {
+	c.Ok(data)
+	c.Abort()
+}
+
 // OkWithCode 返回成功, 默认message
 func (c *Context) OkWithCode(bizCode int, data interface{}) {
 	c.JSON(http.StatusOK, &R{
@@ -45,6 +50,11 @@ func (c *Context) OkWithCode(bizCode int, data interface{}) {
 		Message: biz.Message(bizCode),
 		Data:    data,
 	})
+}
+
+func (c *Context) AbortWithOkCode(bizCode int, data interface{}) {
+	c.OkWithCode(bizCode, data)
+	c.Abort()
 }
 
 // OkWithMessage 返回成功, 默认code
@@ -56,6 +66,11 @@ func (c *Context) OkWithMessage(message string, data interface{}) {
 	})
 }
 
+func (c *Context) AbortWithOkMessage(message string, data interface{}) {
+	c.OkWithMessage(message, data)
+	c.Abort()
+}
+
 // Fail 返回失败, 默认code、message
 func (c *Context) Fail(data interface{}) {
 	c.JSON(http.StatusOK, &R{
@@ -63,6 +78,11 @@ func (c *Context) Fail(data interface{}) {
 		Data:    data,
 		Message: biz.Message(biz.Failure),
 	})
+}
+
+func (c *Context) AbortWithFail(data interface{}) {
+	c.Fail(data)
+	c.Abort()
 }
 
 // FailWithCode 返回失败, 默认message
@@ -74,6 +94,11 @@ func (c *Context) FailWithCode(bizCode int, data interface{}) {
 	})
 }
 
+func (c *Context) AbortWithFailCode(bizCode int, data interface{}) {
+	c.FailWithCode(bizCode, data)
+	c.Abort()
+}
+
 // FailWithMessage 返回失败, 默认code
 func (c *Context) FailWithMessage(message string, data interface{}) {
 	c.JSON(http.StatusOK, &R{
@@ -83,7 +108,17 @@ func (c *Context) FailWithMessage(message string, data interface{}) {
 	})
 }
 
+func (c *Context) AbortWithFailMessage(message string, data interface{}) {
+	c.FailWithMessage(message, data)
+	c.Abort()
+}
+
 // Finish 完成当前请求, 自定义http状态码和rx返回
 func (c *Context) Finish(httpStatus int, r *R) {
 	c.JSON(httpStatus, r)
+}
+
+func (c *Context) AbortFinish(httpStatus int, r *R) {
+	c.Finish(httpStatus, r)
+	c.Abort()
 }

@@ -8,8 +8,9 @@ import (
 
 // AppConfig -.
 type AppConfig struct {
-	Name    string `env-required:"true"	env:"APP_NAME"    yaml:"name"   `
-	Version string `env-required:"true"	env:"APP_VERSION" yaml:"version" `
+	Name         string   `env-required:"true" env:"APP_NAME"    yaml:"name"   `
+	Version      string   `env-required:"true" env:"APP_VERSION" yaml:"version" `
+	AllowOrigins []string `env-required:"true" env:"ALLOW_ORIGINS" yaml:"allowed_origins"`
 }
 
 // HttpConfig -.
