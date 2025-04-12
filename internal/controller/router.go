@@ -14,21 +14,29 @@ import (
 )
 
 func InitRouter(router *gin.Engine) {
+	SetupRouter(router)
+	RegisterHandlers(router)
+}
+
+func SetupRouter(router *gin.Engine) {
 	err := router.SetTrustedProxies([]string{"127.0.0.1"})
 	if err != nil {
 		fmt.Println(err.Error())
 		panic(err)
 	}
 
-	router.Use(middleware.RecoveryMiddleware())
-	router.Use(middleware.CorsMiddleware())
-	router.Use(gin.Logger())
-	router.Use(gin.Recovery())
-
 	router.NoRoute(rx.WrapHandler(noRoute))
 	router.NoMethod(rx.WrapHandler(noMethod))
 	router.LoadHTMLGlob("internal/templates/*")
 
+	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
+	//router.Use(middleware.DomainWhitelistMiddleware())
+	router.Use(middleware.CorsMiddleware())
+	router.Use(middleware.RecoveryMiddleware())
+}
+
+func RegisterHandlers(router *gin.Engine) {
 	auth.RegisterAuthController(router)
 	api.RegisterRootController(router)
 

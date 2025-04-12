@@ -21,16 +21,22 @@ const (
 	InternalServerError = http.StatusInternalServerError
 	NotImplemented      = http.StatusNotImplemented
 	BadGateway          = http.StatusBadGateway
+	ServiceUnavailable  = http.StatusServiceUnavailable
 )
 
 // 错误化状态码：< -1000
 const (
 	BearerAuthorizationInvalid = -1001
-	AccessTokenInvalid         = -2002
-	RefreshTokenInvalid        = -2003
-	DatabaseQueryError         = -2004
-	AccessTokenExpired         = -2005
-	RefreshTokenExpired        = -2006
+	UnknownOrigin              = -1002
+
+	AccessTokenInvalid  = -2002
+	RefreshTokenInvalid = -2003
+	DatabaseQueryError  = -2004
+	AccessTokenExpired  = -2005
+	RefreshTokenExpired = -2006
+
+	AttemptDeleteInValidData = -2007
+	AttemptUpdateInValidData = -2008
 )
 
 // 业务化状态码: >1000
@@ -53,15 +59,20 @@ var bizMessage = map[int]string{
 	InternalServerError: http.StatusText(InternalServerError),
 	NotImplemented:      http.StatusText(NotImplemented),
 	BadGateway:          http.StatusText(BadGateway),
+	ServiceUnavailable:  http.StatusText(ServiceUnavailable),
 
 	// 错误化状态码：< -1000
 	BearerAuthorizationInvalid: "Bearer Authorization Invalid",
+	UnknownOrigin:              "Unknown Origin",
 
 	AccessTokenInvalid:  "AccessToken Invalid",
 	RefreshTokenInvalid: "RefreshToken Invalid",
 	DatabaseQueryError:  "database query error",
 	AccessTokenExpired:  "AccessToken expired",
 	RefreshTokenExpired: "RefreshToken expired",
+
+	AttemptDeleteInValidData: "Attempt Delete In Valid Data",
+	AttemptUpdateInValidData: "Attempt Update In Valid Data",
 
 	// 业务化状态码: >1000
 	UserNotHasAdminRole: "User does not have admin role",

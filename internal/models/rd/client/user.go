@@ -1,4 +1,4 @@
-package rdclient
+package rdClient
 
 import "time"
 

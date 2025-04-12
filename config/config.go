@@ -2,14 +2,16 @@ package config
 
 import (
 	"os"
+	"path/filepath"
 
 	"gopkg.in/yaml.v3"
 )
 
 // AppConfig -.
 type AppConfig struct {
-	Name    string `env-required:"true"	env:"APP_NAME"    yaml:"name"   `
-	Version string `env-required:"true"	env:"APP_VERSION" yaml:"version" `
+	Name         string   `env-required:"true" env:"APP_NAME"    yaml:"name"   `
+	Version      string   `env-required:"true" env:"APP_VERSION" yaml:"version" `
+	AllowOrigins []string `env-required:"true" env:"ALLOW_ORIGINS" yaml:"allowed_origins"`
 }
 
 // HttpConfig -.
@@ -72,7 +74,10 @@ func init() {
 	case Env.Dev:
 		config := &Config{}
 
-		dataBytes, err := os.ReadFile("config/development.yaml")
+		pwd, _ := os.Getwd()
+		configFilePath := filepath.Join(pwd, "config", "development.yaml")
+
+		dataBytes, err := os.ReadFile(configFilePath)
 		if err != nil {
 			panic(err)
 		}
