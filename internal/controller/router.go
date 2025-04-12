@@ -31,7 +31,7 @@ func SetupRouter(router *gin.Engine) {
 
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
-	router.Use(middleware.DomainWhitelistMiddleware())
+	//router.Use(middleware.DomainWhitelistMiddleware())
 	router.Use(middleware.CorsMiddleware())
 	router.Use(middleware.RecoveryMiddleware())
 }

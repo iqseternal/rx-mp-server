@@ -1,0 +1,177 @@
+package v1RX
+
+import (
+	"gorm.io/gorm"
+	"rx-mp/internal/biz"
+	rdMarket "rx-mp/internal/models/rd/rx_market"
+	"rx-mp/internal/pkg/rx"
+	"rx-mp/internal/pkg/storage"
+)
+
+type GetGetExtensionGroupListQuery struct {
+	ExtensionGroupId   *int    `form:"extension_group_id" binding:"omitempty,gt=0"`
+	ExtensionGroupName *string `form:"extension_group_name" binding:"omitempty"`
+}
+
+func GetExtensionGroupList(c *rx.Context) {
+	var query GetGetExtensionGroupListQuery
+	if err := c.ShouldBindQuery(&query); err != nil {
+		c.FailWithMessage(err.Error(), nil)
+		return
+	}
+
+	var extensionGroupList []rdMarket.ExtensionGroup
+	db := storage.RdPostgres
+
+	if query.ExtensionGroupId != nil {
+		db = db.Where("extension_group_id = ?", *query.ExtensionGroupId)
+	}
+
+	if query.ExtensionGroupName != nil {
+		db = db.Where("extension_group_name like ?", "%"+*query.ExtensionGroupName+"%")
+	}
+
+	result := db.Find(&extensionGroupList)
+
+	if result.Error != nil {
+		c.FailWithMessage(result.Error.Error(), nil)
+		return
+	}
+
+	c.Ok(extensionGroupList)
+}
+
+type AddExtensionGroupPayload struct {
+	ExtensionGroupName string `json:"extension_group_name" binding:"required"`
+	Description        string `json:"description" binding:"omitempty"`
+}
+
+func AddExtensionGroup(c *rx.Context) {
+	var payload AddExtensionGroupPayload
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		c.FailWithMessage(err.Error(), nil)
+		return
+	}
+
+	result := storage.RdPostgres.Create(&rdMarket.ExtensionGroup{
+		ExtensionGroupName: payload.ExtensionGroupName,
+		Description:        payload.Description,
+	})
+
+	if result.Error != nil {
+		c.FailWithMessage(result.Error.Error(), nil)
+		return
+	}
+
+	c.Ok(result.Row())
+}
+
+type DelExtensionGroupPayload struct {
+	ExtensionGroupId   int    `json:"extension_group_id" binding:"required"`
+	ExtensionGroupUuid string `json:"extension_group_uuid" binding:"required"`
+}
+
+func DelExtensionGroup(c *rx.Context) {
+	var payload DelExtensionGroupPayload
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		c.FailWithMessage(err.Error(), nil)
+		return
+	}
+
+	result := storage.RdPostgres.
+		Model(&rdMarket.ExtensionGroup{}).
+		Where("extension_group_id = ?", payload.ExtensionGroupId).
+		Where("extension_group_uuid = ?", payload.ExtensionGroupUuid).
+		Update("status", gorm.Expr(
+			"jsonb_set(status, '{is_deleted}', ?)",
+			true,
+		))
+
+	if result.Error != nil {
+		c.FailWithMessage(result.Error.Error(), nil)
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		c.FailWithCode(biz.AttemptDeleteInValidData, nil)
+		return
+	}
+
+	c.Ok(nil)
+}
+
+type GetExtensionGroupQuery struct {
+	ExtensionGroupId   *int    `form:"extension_group_id" binding:"required"`
+	ExtensionGroupUuid *string `form:"extension_group_uuid" binding:"required"`
+}
+
+func GetExtensionGroup(c *rx.Context) {
+	var query GetExtensionGroupQuery
+	if err := c.ShouldBindQuery(&query); err != nil {
+		c.FailWithMessage(err.Error(), nil)
+		return
+	}
+
+	var extensionGroup rdMarket.ExtensionGroup
+	result := storage.RdPostgres.
+		Where("extension_group_id = ?", query.ExtensionGroupId).
+		Where("extension_group_uuid = ?", query.ExtensionGroupUuid).
+		First(&extensionGroup)
+
+	if result.Error != nil {
+		c.FailWithMessage(result.Error.Error(), nil)
+		return
+	}
+
+	c.Ok(extensionGroup)
+}
+
+type ModifyExtensionGroupPayload struct {
+	ExtensionGroupId   *int    `json:"extension_group_id" binding:"required"`
+	ExtensionGroupUuid *string `json:"extension_group_uuid" binding:"required"`
+
+	ExtensionGroupName *string `json:"extension_group_name" binding:"omitempty"`
+	Description        *string `json:"description" binding:"omitempty"`
+}
+
+func ModifyExtensionGroup(c *rx.Context) {
+	var payload ModifyExtensionGroupPayload
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		c.FailWithMessage(err.Error(), nil)
+		return
+	}
+
+	// 动态构建更新字段
+	updates := make(map[string]interface{})
+	if payload.ExtensionGroupName != nil {
+		updates["extension_group_name"] = *payload.ExtensionGroupName
+	}
+
+	if payload.Description != nil {
+		updates["description"] = *payload.Description
+	}
+
+	// 无有效更新字段时快速返回
+	if len(updates) == 0 {
+		c.FailWithCode(biz.AttemptUpdateInValidData, nil)
+		return
+	}
+
+	result := storage.RdPostgres.
+		Model(&rdMarket.ExtensionGroup{}).
+		Where("extension_group_id = ?", payload.ExtensionGroupId).
+		Where("extension_group_uuid = ?", payload.ExtensionGroupUuid).
+		Updates(updates) // 一次性更新所有字段
+
+	if result.Error != nil {
+		c.FailWithMessage(result.Error.Error(), nil)
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		c.FailWithCode(biz.AttemptUpdateInValidData, nil)
+		return
+	}
+
+	c.Ok(nil)
+}

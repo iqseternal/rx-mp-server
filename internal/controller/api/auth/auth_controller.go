@@ -76,7 +76,7 @@ func UpdateAccessToken(r *rx.Context) {
 		return
 	}
 
-	var user *rdclient.User
+	var user *rdClient.User
 	result := storage.RdPostgres.Where("refresh_token=?", refreshToken).First(&user)
 
 	if result.Error != nil {

@@ -11,16 +11,16 @@ const (
 	MBUserID = "user_id"
 )
 
-func SetMBICUser(c *gin.Context, user *rdclient.User) {
+func SetMBICUser(c *gin.Context, user *rdClient.User) {
 	c.Set(MBUser, user)
 }
 
-func GetMBICUser(c *gin.Context) (*rdclient.User, error) {
+func GetMBICUser(c *gin.Context) (*rdClient.User, error) {
 	iUser, iHasUser := c.Get(MBUser)
 	if !iHasUser {
 		return nil, fmt.Errorf("not Found user with MBInc")
 	}
-	user := iUser.(*rdclient.User)
+	user := iUser.(*rdClient.User)
 	return user, nil
 }
 

@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"regexp"
 	"rx-mp/config"
@@ -31,6 +32,8 @@ func DomainWhitelistMiddleware() gin.HandlerFunc {
 
 	return rx.WrapHandler(func(c *rx.Context) {
 		origin := c.Request.Header.Get("Origin")
+
+		log.Printf("来源 %s", origin)
 
 		if origin == "" {
 			c.Next() // 允许无 Origin 的请求

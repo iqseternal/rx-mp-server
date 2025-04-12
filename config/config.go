@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"path/filepath"
 
 	"gopkg.in/yaml.v3"
 )
@@ -73,7 +74,10 @@ func init() {
 	case Env.Dev:
 		config := &Config{}
 
-		dataBytes, err := os.ReadFile("config/development.yaml")
+		pwd, _ := os.Getwd()
+		configFilePath := filepath.Join(pwd, "config", "development.yaml")
+
+		dataBytes, err := os.ReadFile(configFilePath)
 		if err != nil {
 			panic(err)
 		}

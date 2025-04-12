@@ -44,7 +44,7 @@ func Login(c *rx.Context) {
 		return
 	}
 
-	var user rdclient.User
+	var user rdClient.User
 	result := storage.RdPostgres.
 		Where("email = ?", payload.Email).
 		Limit(1).
@@ -109,7 +109,7 @@ func Register(c *rx.Context) {
 	}
 
 	email := payload.Email
-	var user *rdclient.User
+	var user *rdClient.User
 
 	result := storage.RdPostgres.Where("email = ?", email).First(user)
 
@@ -128,7 +128,7 @@ func Register(c *rx.Context) {
 	password := string(hashedPassword)
 
 	// 创建用户对象
-	user = &rdclient.User{
+	user = &rdClient.User{
 		Email:    payload.Email,
 		Username: payload.Username,
 		Password: &password,
