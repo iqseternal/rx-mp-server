@@ -29,11 +29,12 @@ const (
 	BearerAuthorizationInvalid = -1001
 	UnknownOrigin              = -1002
 
-	AccessTokenInvalid  = -2002
-	RefreshTokenInvalid = -2003
-	DatabaseQueryError  = -2004
-	AccessTokenExpired  = -2005
-	RefreshTokenExpired = -2006
+	NotCarryResourceAccessToken = -2001
+	AccessTokenInvalid          = -2002
+	RefreshTokenInvalid         = -2003
+	DatabaseQueryError          = -2004
+	AccessTokenExpired          = -2005
+	RefreshTokenExpired         = -2006
 
 	AttemptDeleteInValidData = -2007
 	AttemptUpdateInValidData = -2008
@@ -65,11 +66,12 @@ var bizMessage = map[int]string{
 	BearerAuthorizationInvalid: "Bearer Authorization Invalid",
 	UnknownOrigin:              "Unknown Origin",
 
-	AccessTokenInvalid:  "AccessToken Invalid",
-	RefreshTokenInvalid: "RefreshToken Invalid",
-	DatabaseQueryError:  "database query error",
-	AccessTokenExpired:  "AccessToken expired",
-	RefreshTokenExpired: "RefreshToken expired",
+	NotCarryResourceAccessToken: "Not CarryResourceAccessToken",
+	AccessTokenInvalid:          "AccessToken Invalid",
+	RefreshTokenInvalid:         "RefreshToken Invalid",
+	DatabaseQueryError:          "database query error",
+	AccessTokenExpired:          "AccessToken expired",
+	RefreshTokenExpired:         "RefreshToken expired",
 
 	AttemptDeleteInValidData: "Attempt Delete In Valid Data",
 	AttemptUpdateInValidData: "Attempt Update In Valid Data",
