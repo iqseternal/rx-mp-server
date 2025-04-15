@@ -49,7 +49,7 @@ type AddExtensionGroupPayload struct {
 func AddExtensionGroup(c *rx.Context) {
 	var payload AddExtensionGroupPayload
 	if err := c.ShouldBindJSON(&payload); err != nil {
-		c.FailWithMessage(err.Error(), nil)
+		c.FailWithCodeMessage(biz.ParameterError, err.Error(), nil)
 		return
 	}
 
@@ -59,7 +59,7 @@ func AddExtensionGroup(c *rx.Context) {
 	})
 
 	if result.Error != nil {
-		c.FailWithMessage(result.Error.Error(), nil)
+		c.FailWithCodeMessage(biz.DatabaseQueryError, result.Error.Error(), nil)
 		return
 	}
 
@@ -74,7 +74,7 @@ type DelExtensionGroupPayload struct {
 func DelExtensionGroup(c *rx.Context) {
 	var payload DelExtensionGroupPayload
 	if err := c.ShouldBindJSON(&payload); err != nil {
-		c.FailWithMessage(err.Error(), nil)
+		c.FailWithCodeMessage(biz.ParameterError, err.Error(), nil)
 		return
 	}
 
@@ -88,12 +88,12 @@ func DelExtensionGroup(c *rx.Context) {
 		))
 
 	if result.Error != nil {
-		c.FailWithMessage(result.Error.Error(), nil)
+		c.FailWithCodeMessage(biz.DatabaseQueryError, result.Error.Error(), nil)
 		return
 	}
 
 	if result.RowsAffected == 0 {
-		c.FailWithCode(biz.AttemptDeleteInValidData, nil)
+		c.FailWithCodeMessage(biz.AttemptDeleteInValidData, "尝试删除无效数据", nil)
 		return
 	}
 
@@ -108,7 +108,7 @@ type GetExtensionGroupQuery struct {
 func GetExtensionGroup(c *rx.Context) {
 	var query GetExtensionGroupQuery
 	if err := c.ShouldBindQuery(&query); err != nil {
-		c.FailWithMessage(err.Error(), nil)
+		c.FailWithCodeMessage(biz.ParameterError, err.Error(), nil)
 		return
 	}
 
@@ -119,7 +119,7 @@ func GetExtensionGroup(c *rx.Context) {
 		First(&extensionGroup)
 
 	if result.Error != nil {
-		c.FailWithMessage(result.Error.Error(), nil)
+		c.FailWithMessage("扩展组不存在", nil)
 		return
 	}
 
@@ -137,7 +137,7 @@ type ModifyExtensionGroupPayload struct {
 func ModifyExtensionGroup(c *rx.Context) {
 	var payload ModifyExtensionGroupPayload
 	if err := c.ShouldBindJSON(&payload); err != nil {
-		c.FailWithMessage(err.Error(), nil)
+		c.FailWithCodeMessage(biz.ParameterError, err.Error(), nil)
 		return
 	}
 
@@ -164,7 +164,7 @@ func ModifyExtensionGroup(c *rx.Context) {
 		Updates(updates) // 一次性更新所有字段
 
 	if result.Error != nil {
-		c.FailWithMessage(result.Error.Error(), nil)
+		c.FailWithCodeMessage(biz.DatabaseQueryError, result.Error.Error(), nil)
 		return
 	}
 

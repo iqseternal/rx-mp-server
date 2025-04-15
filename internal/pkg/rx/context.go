@@ -66,6 +66,14 @@ func (c *Context) OkWithMessage(message string, data interface{}) {
 	})
 }
 
+func (c *Context) OkWithCodeMessage(bizCode int, message string, data interface{}) {
+	c.JSON(http.StatusOK, &R{
+		Code:    bizCode,
+		Message: &message,
+		Data:    data,
+	})
+}
+
 func (c *Context) AbortWithOkMessage(message string, data interface{}) {
 	c.OkWithMessage(message, data)
 	c.Abort()
@@ -111,6 +119,14 @@ func (c *Context) FailWithMessage(message string, data interface{}) {
 func (c *Context) AbortWithFailMessage(message string, data interface{}) {
 	c.FailWithMessage(message, data)
 	c.Abort()
+}
+
+func (c *Context) FailWithCodeMessage(bizCode int, message string, data interface{}) {
+	c.JSON(http.StatusOK, &R{
+		Code:    bizCode,
+		Message: &message,
+		Data:    data,
+	})
 }
 
 // Finish 完成当前请求, 自定义http状态码和rx返回

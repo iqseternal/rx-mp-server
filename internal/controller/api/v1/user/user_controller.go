@@ -2,6 +2,7 @@ package v1User
 
 import (
 	"log"
+	"rx-mp/internal/biz"
 	"rx-mp/internal/middleware"
 	"rx-mp/internal/models/rd/client"
 	"rx-mp/internal/pkg/auth"
@@ -40,7 +41,7 @@ func Login(c *rx.Context) {
 	var payload LoginPayload
 
 	if err := c.ShouldBindJSON(&payload); err != nil {
-		c.FailWithMessage(err.Error(), nil)
+		c.FailWithCodeMessage(biz.ParameterError, err.Error(), nil)
 		return
 	}
 
@@ -51,7 +52,7 @@ func Login(c *rx.Context) {
 		First(&user)
 
 	if result.Error != nil {
-		c.FailWithMessage(result.Error.Error(), nil)
+		c.FailWithCode(biz.UserNotExists, nil)
 		return
 	}
 
@@ -76,13 +77,13 @@ func Login(c *rx.Context) {
 
 	if result.Error != nil {
 		log.Println("更新 access token 出错:", result.Error)
-		c.FailWithMessage(result.Error.Error(), nil)
+		c.FailWithCodeMessage(biz.DatabaseQueryError, result.Error.Error(), nil)
 		return
 	}
 
 	err = storage.MemoCache.Set(refreshToken, fmt.Sprint(user.UserID))
 	if err != nil {
-		c.FailWithMessage(result.Error.Error(), nil)
+		c.FailWithCodeMessage(biz.MemoryCacheQueryError, result.Error.Error(), nil)
 		return
 	}
 
@@ -104,7 +105,7 @@ func Register(c *rx.Context) {
 	var payload RegisterPayload
 
 	if err := c.ShouldBindJSON(&payload); err != nil {
-		c.FailWithMessage(err.Error(), nil)
+		c.FailWithCodeMessage(biz.ParameterError, err.Error(), nil)
 		return
 	}
 
@@ -113,15 +114,15 @@ func Register(c *rx.Context) {
 
 	result := storage.RdPostgres.Where("email = ?", email).First(user)
 
-	if result.Error == nil {
-		c.FailWithMessage("email is exist", nil)
+	if result.RowsAffected != 0 {
+		c.FailWithCodeMessage(biz.Failure, "邮箱已存在", nil)
 		return
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(payload.Password), bcrypt.DefaultCost)
 	if err != nil {
 		log.Println("密码哈希处理失败:", err)
-		c.JSON(500, gin.H{"error": "服务器内部错误"})
+		c.FailWithCodeMessage(biz.InternalServerError, "无法生成hash串", nil)
 		return
 	}
 
@@ -141,7 +142,7 @@ func Register(c *rx.Context) {
 
 	result = storage.RdPostgres.Create(&user)
 	if result.Error != nil {
-		c.FailWithMessage(result.Error.Error(), nil)
+		c.FailWithCodeMessage(biz.DatabaseQueryError, result.Error.Error(), nil)
 		return
 	}
 
@@ -151,7 +152,7 @@ func Register(c *rx.Context) {
 func GetUserInfo(c *rx.Context) {
 	user, err := mbic.GetMBICUser(c.Context)
 	if err != nil {
-		c.FailWithMessage(err.Error(), nil)
+		c.FailWithCodeMessage(biz.MBICQueryError, err.Error(), nil)
 		return
 	}
 

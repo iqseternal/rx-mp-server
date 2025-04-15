@@ -18,5 +18,10 @@ func RegisterRXController(router *gin.Engine) {
 		routerGroup.DELETE("/api/v1/rx/ext/ext_group", rx.WrapHandler(DelExtensionGroup))
 		routerGroup.GET("/api/v1/rx/ext/ext_group", rx.WrapHandler(GetExtensionGroup))
 		routerGroup.POST("/api/v1/rx/ext/ext_group", rx.WrapHandler(ModifyExtensionGroup))
+
+		routerGroup.PUT("/api/v1/rx/ext/ext", rx.WrapHandler(AddExtension))
+		routerGroup.DELETE("/api/v1/rx/ext/ext", rx.WrapHandler(DelExtension))
+		routerGroup.GET("/api/v1/rx/ext/ext", rx.WrapHandler(GetExtension))
+		routerGroup.POST("/api/v1/rx/ext/ext", rx.WrapHandler(ModifyExtension))
 	}
 }
