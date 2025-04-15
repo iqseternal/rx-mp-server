@@ -36,6 +36,8 @@ const (
 	DatabaseQueryError          = -2004
 	AccessTokenExpired          = -2005
 	RefreshTokenExpired         = -2006
+	MemoryCacheQueryError       = -2009
+	MBICQueryError              = -2010
 
 	AttemptDeleteInValidData = -2007
 	AttemptUpdateInValidData = -2008
@@ -74,6 +76,8 @@ var bizMessage = map[int]string{
 	DatabaseQueryError:          "database query error",
 	AccessTokenExpired:          "AccessToken expired",
 	RefreshTokenExpired:         "RefreshToken expired",
+	MemoryCacheQueryError:       "memory cache query error",
+	MBICQueryError:              "MBIC Query Error",
 
 	AttemptDeleteInValidData: "Attempt Delete In Valid Data",
 	AttemptUpdateInValidData: "Attempt Update In Valid Data",

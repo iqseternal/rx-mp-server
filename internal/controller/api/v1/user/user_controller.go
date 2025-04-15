@@ -109,10 +109,8 @@ func Register(c *rx.Context) {
 		return
 	}
 
-	email := payload.Email
 	var user *rdClient.User
-
-	result := storage.RdPostgres.Where("email = ?", email).First(user)
+	result := storage.RdPostgres.Where("email = ?", payload.Email).First(&user)
 
 	if result.RowsAffected != 0 {
 		c.FailWithCodeMessage(biz.Failure, "邮箱已存在", nil)
