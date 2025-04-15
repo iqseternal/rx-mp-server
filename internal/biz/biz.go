@@ -30,13 +30,12 @@ const (
 	UnknownOrigin              = -1002
 	ParameterError             = -1003
 
-	AccessTokenInvalid    = -2002
-	RefreshTokenInvalid   = -2003
-	DatabaseQueryError    = -2004
-	AccessTokenExpired    = -2005
-	RefreshTokenExpired   = -2006
-	MemoryCacheQueryError = -2009
-	MBICQueryError        = -2010
+	NotCarryResourceAccessToken = -2001
+	AccessTokenInvalid          = -2002
+	RefreshTokenInvalid         = -2003
+	DatabaseQueryError          = -2004
+	AccessTokenExpired          = -2005
+	RefreshTokenExpired         = -2006
 
 	AttemptDeleteInValidData = -2007
 	AttemptUpdateInValidData = -2008
@@ -67,15 +66,13 @@ var bizMessage = map[int]string{
 	// 错误化状态码：< -1000
 	BearerAuthorizationInvalid: "Bearer Authorization Invalid",
 	UnknownOrigin:              "Unknown Origin",
-	ParameterError:             "Parameter Error",
 
-	AccessTokenInvalid:    "AccessToken Invalid",
-	RefreshTokenInvalid:   "RefreshToken Invalid",
-	DatabaseQueryError:    "database query error",
-	AccessTokenExpired:    "AccessToken expired",
-	RefreshTokenExpired:   "RefreshToken expired",
-	MemoryCacheQueryError: "memory cache query error",
-	MBICQueryError:        "MBIC Query Error",
+	NotCarryResourceAccessToken: "Not CarryResourceAccessToken",
+	AccessTokenInvalid:          "AccessToken Invalid",
+	RefreshTokenInvalid:         "RefreshToken Invalid",
+	DatabaseQueryError:          "database query error",
+	AccessTokenExpired:          "AccessToken expired",
+	RefreshTokenExpired:         "RefreshToken expired",
 
 	AttemptDeleteInValidData: "Attempt Delete In Valid Data",
 	AttemptUpdateInValidData: "Attempt Update In Valid Data",

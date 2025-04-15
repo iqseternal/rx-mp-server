@@ -21,6 +21,12 @@ func ResourceAccessControlMiddleware() gin.HandlerFunc {
 	return rx.WrapHandler(func(c *rx.Context) {
 		accessAuthorization, err := c.Request.Cookie("access_token")
 
+		if err != nil {
+			c.FailWithCode(biz.NotCarryResourceAccessToken, nil)
+			c.Abort()
+			return
+		}
+
 		if accessAuthorization.Value == "dev_access_token" {
 			c.Next()
 			return
