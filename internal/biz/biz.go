@@ -66,6 +66,7 @@ var bizMessage = map[int]string{
 	// 错误化状态码：< -1000
 	BearerAuthorizationInvalid: "Bearer Authorization Invalid",
 	UnknownOrigin:              "Unknown Origin",
+	ParameterError:             "Parameter Error",
 
 	NotCarryResourceAccessToken: "Not CarryResourceAccessToken",
 	AccessTokenInvalid:          "AccessToken Invalid",
