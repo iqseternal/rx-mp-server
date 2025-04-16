@@ -14,9 +14,9 @@ type Extension struct {
 	ExtensionName    string      `json:"extension_name" gorm:"not null;comment:'分组名称'"`
 	UseVersion       *int        `json:"use_version" gorm:"type:int;"`
 	ScriptHash       *string     `json:"script_hash" gorm:"type:text;"`
-	Metadata         interface{} `json:"metadata" gorm:"type:jsonb;serializer:json"`
+	Metadata         interface{} `json:"metadata" gorm:"type:jsonb;default:'{}';serializer:json;not null;"`
 
-	Status ExtensionStatusField `json:"status" gorm:"type:jsonb;serializer:json"`
+	Status ExtensionStatusField `json:"status" gorm:"type:jsonb;default:'{}';serializer:json;not null;"`
 
 	CreatorID *uint `json:"creator_id" gorm:"type:int;"`
 	UpdaterID *uint `json:"updater_id" gorm:"type:int;"`

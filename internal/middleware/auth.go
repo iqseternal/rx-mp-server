@@ -21,6 +21,12 @@ func ResourceAccessControlMiddleware() gin.HandlerFunc {
 	return rx.WrapHandler(func(c *rx.Context) {
 		accessAuthorization, err := c.Request.Cookie("access_token")
 
+		if err != nil {
+			c.FailWithCode(biz.NotCarryResourceAccessToken, nil)
+			c.Abort()
+			return
+		}
+
 		if accessAuthorization.Value == "dev_access_token" {
 			c.Next()
 			return
@@ -43,13 +49,13 @@ func ResourceAccessControlMiddleware() gin.HandlerFunc {
 		if err != nil {
 			claims, err := auth.VerifyAccessToken(accessToken)
 			if err != nil {
-				c.FailWithCode(biz.BearerAuthorizationInvalid, nil)
+				c.FailWithCode(biz.AccessTokenInvalid, nil)
 				c.Abort()
 				return
 			}
 
 			if time.Now().Unix() > claims.ExpiresAt.Unix() {
-				c.FailWithCode(biz.BearerAuthorizationInvalid, nil)
+				c.FailWithCode(biz.AccessTokenExpired, nil)
 				c.Abort()
 				return
 			}
@@ -59,12 +65,7 @@ func ResourceAccessControlMiddleware() gin.HandlerFunc {
 
 		result := storage.RdPostgres.Where("user_id=?", userId).First(&user)
 		if result.Error != nil {
-			c.Finish(http.StatusUnauthorized, &rx.R{
-				Code:    biz.UserNotExists,
-				Message: biz.Message(biz.UserNotExists),
-				Data:    nil,
-			})
-			c.Abort()
+			c.FailWithCode(biz.UserNotExists, nil)
 			return
 		}
 
@@ -94,21 +95,17 @@ func CredentialAccessControlMiddleware() gin.HandlerFunc {
 		var user *rdClient.User
 		result := storage.RdPostgres.Where("refresh_token=?", refreshToken).First(&user)
 		if result.Error != nil {
-			c.Finish(http.StatusUnauthorized, &rx.R{
-				Code:    biz.BearerAuthorizationInvalid,
-				Message: biz.Message(biz.BearerAuthorizationInvalid),
-				Data:    nil,
-			})
+			c.FailWithCode(biz.RefreshTokenInvalid, nil)
 			c.Abort()
 			return
 		}
-
+		
 		// 验证 Refresh Token 有效性
 		claims, err := auth.VerifyRefreshToken(refreshToken)
 		if err != nil {
 			c.Finish(http.StatusUnauthorized, &rx.R{
-				Code:    biz.BearerAuthorizationInvalid,
-				Message: biz.Message(biz.BearerAuthorizationInvalid),
+				Code:    biz.RefreshTokenInvalid,
+				Message: biz.Message(biz.RefreshTokenInvalid),
 				Data:    nil,
 			})
 			c.Abort()
@@ -116,7 +113,7 @@ func CredentialAccessControlMiddleware() gin.HandlerFunc {
 		}
 
 		if time.Now().Unix() > claims.ExpiresAt.Unix() {
-			c.FailWithCode(biz.BearerAuthorizationInvalid, nil)
+			c.FailWithCode(biz.RefreshTokenExpired, nil)
 			c.Abort()
 			return
 		}
