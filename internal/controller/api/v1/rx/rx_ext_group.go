@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 	"rx-mp/internal/biz"
 	rdMarket "rx-mp/internal/models/rd/rx_market"
+	"rx-mp/internal/pkg/mbic"
 	"rx-mp/internal/pkg/rx"
 	"rx-mp/internal/pkg/storage"
 )
@@ -21,7 +22,8 @@ func GetExtensionGroupList(c *rx.Context) {
 	}
 
 	var extensionGroupList []rdMarket.ExtensionGroup
-	db := storage.RdPostgres
+	db := storage.RdPostgres.
+		Where("COALESCE((status->>'is_deleted')::boolean, false) = ?", false)
 
 	if query.ExtensionGroupId != nil {
 		db = db.Where("extension_group_id = ?", *query.ExtensionGroupId)
@@ -30,6 +32,8 @@ func GetExtensionGroupList(c *rx.Context) {
 	if query.ExtensionGroupName != nil {
 		db = db.Where("extension_group_name like ?", "%"+*query.ExtensionGroupName+"%")
 	}
+
+	db = db.Order("updated_time desc")
 
 	result := db.Find(&extensionGroupList)
 
@@ -47,6 +51,12 @@ type AddExtensionGroupPayload struct {
 }
 
 func AddExtensionGroup(c *rx.Context) {
+	user, err := mbic.GetMBICUser(c.Context)
+	if err != nil {
+		c.FailWithCodeMessage(biz.MBICQueryError, err.Error(), nil)
+		return
+	}
+
 	var payload AddExtensionGroupPayload
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		c.FailWithCodeMessage(biz.ParameterError, err.Error(), nil)
@@ -56,6 +66,7 @@ func AddExtensionGroup(c *rx.Context) {
 	result := storage.RdPostgres.Create(&rdMarket.ExtensionGroup{
 		ExtensionGroupName: payload.ExtensionGroupName,
 		Description:        payload.Description,
+		CreatorID:          &user.UserID,
 	})
 
 	if result.Error != nil {
@@ -72,20 +83,31 @@ type DelExtensionGroupPayload struct {
 }
 
 func DelExtensionGroup(c *rx.Context) {
+	user, err := mbic.GetMBICUser(c.Context)
+	if err != nil {
+		c.FailWithCodeMessage(biz.MBICQueryError, err.Error(), nil)
+		return
+	}
+
 	var payload DelExtensionGroupPayload
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		c.FailWithCodeMessage(biz.ParameterError, err.Error(), nil)
 		return
 	}
 
+	updates := make(map[string]interface{})
+	updates["updater_id"] = &user.UserID
+	updates["status"] = gorm.Expr(
+		"jsonb_set(status, '{is_deleted}', ?)",
+		true,
+	)
+
 	result := storage.RdPostgres.
 		Model(&rdMarket.ExtensionGroup{}).
+		Where("COALESCE((status->>'is_deleted')::boolean, false) = ?", false).
 		Where("extension_group_id = ?", payload.ExtensionGroupId).
 		Where("extension_group_uuid = ?", payload.ExtensionGroupUuid).
-		Update("status", gorm.Expr(
-			"jsonb_set(status, '{is_deleted}', ?)",
-			true,
-		))
+		Updates(updates)
 
 	if result.Error != nil {
 		c.FailWithCodeMessage(biz.DatabaseQueryError, result.Error.Error(), nil)
@@ -114,6 +136,7 @@ func GetExtensionGroup(c *rx.Context) {
 
 	var extensionGroup rdMarket.ExtensionGroup
 	result := storage.RdPostgres.
+		Where("COALESCE((status->>'is_deleted')::boolean, false) = ?", false).
 		Where("extension_group_id = ?", query.ExtensionGroupId).
 		Where("extension_group_uuid = ?", query.ExtensionGroupUuid).
 		First(&extensionGroup)
@@ -135,6 +158,12 @@ type ModifyExtensionGroupPayload struct {
 }
 
 func ModifyExtensionGroup(c *rx.Context) {
+	user, err := mbic.GetMBICUser(c.Context)
+	if err != nil {
+		c.FailWithCodeMessage(biz.MBICQueryError, err.Error(), nil)
+		return
+	}
+
 	var payload ModifyExtensionGroupPayload
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		c.FailWithCodeMessage(biz.ParameterError, err.Error(), nil)
@@ -143,6 +172,8 @@ func ModifyExtensionGroup(c *rx.Context) {
 
 	// 动态构建更新字段
 	updates := make(map[string]interface{})
+	updates["creator_id"] = &user.UserID
+
 	if payload.ExtensionGroupName != nil {
 		updates["extension_group_name"] = *payload.ExtensionGroupName
 	}
@@ -151,7 +182,6 @@ func ModifyExtensionGroup(c *rx.Context) {
 		updates["description"] = *payload.Description
 	}
 
-	// 无有效更新字段时快速返回
 	if len(updates) == 0 {
 		c.FailWithCode(biz.AttemptUpdateInValidData, nil)
 		return
@@ -159,6 +189,7 @@ func ModifyExtensionGroup(c *rx.Context) {
 
 	result := storage.RdPostgres.
 		Model(&rdMarket.ExtensionGroup{}).
+		Where("COALESCE((status->>'is_deleted')::boolean, false) = ?", false).
 		Where("extension_group_id = ?", payload.ExtensionGroupId).
 		Where("extension_group_uuid = ?", payload.ExtensionGroupUuid).
 		Updates(updates) // 一次性更新所有字段
