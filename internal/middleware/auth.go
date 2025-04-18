@@ -66,6 +66,7 @@ func ResourceAccessControlMiddleware() gin.HandlerFunc {
 		result := storage.RdPostgres.Where("user_id=?", userId).First(&user)
 		if result.Error != nil {
 			c.FailWithCode(biz.UserNotExists, nil)
+			c.Abort()
 			return
 		}
 
@@ -99,7 +100,7 @@ func CredentialAccessControlMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		
+
 		// 验证 Refresh Token 有效性
 		claims, err := auth.VerifyRefreshToken(refreshToken)
 		if err != nil {
