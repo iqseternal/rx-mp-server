@@ -150,8 +150,8 @@ func GetExtensionGroup(c *rx.Context) {
 }
 
 type ModifyExtensionGroupPayload struct {
-	ExtensionGroupId   *int    `json:"extension_group_id" binding:"required"`
-	ExtensionGroupUuid *string `json:"extension_group_uuid" binding:"required"`
+	ExtensionGroupId   int    `json:"extension_group_id" binding:"required"`
+	ExtensionGroupUuid string `json:"extension_group_uuid" binding:"required"`
 
 	ExtensionGroupName *string `json:"extension_group_name" binding:"omitempty"`
 	Description        *string `json:"description" binding:"omitempty"`

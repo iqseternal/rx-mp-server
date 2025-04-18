@@ -9,6 +9,47 @@ import (
 	"rx-mp/internal/pkg/storage"
 )
 
+type GetExtensionListQuery struct {
+	ExtensionGroupId *int `form:"extension_group_id" binding:"omitempty,gt=0"`
+
+	ExtensionId   *int    `form:"extension_id" binding:"omitempty,gt=0"`
+	ExtensionName *string `form:"extension_name" binding:"omitempty"`
+}
+
+func GetExtensionList(c *rx.Context) {
+	var query GetExtensionListQuery
+	if err := c.ShouldBindQuery(&query); err != nil {
+		c.FailWithMessage(err.Error(), nil)
+		return
+	}
+
+	var extensionList []rdMarket.Extension
+	db := storage.RdPostgres.Where("COALESCE((status->>'is_deleted')::boolean, false) = ?", false)
+
+	if query.ExtensionGroupId != nil {
+		db = db.Where("extension_group_id = ?", *query.ExtensionGroupId)
+	}
+
+	if query.ExtensionId != nil {
+		db = db.Where("extension_id = ?", *query.ExtensionId)
+	}
+
+	if query.ExtensionName != nil {
+		db = db.Where("extension_name like ?", "%"+*query.ExtensionName+"%")
+	}
+
+	db = db.Order("updated_time desc")
+
+	result := db.Find(&extensionList)
+
+	if result.Error != nil {
+		c.FailWithMessage(result.Error.Error(), nil)
+		return
+	}
+
+	c.Ok(extensionList)
+}
+
 type AddExtensionPayload struct {
 	ExtensionGroupId   int    `json:"extension_group_id"`
 	ExtensionGroupUuid string `json:"extension_group_uuid"`
