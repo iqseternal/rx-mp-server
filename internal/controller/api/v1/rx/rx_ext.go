@@ -10,7 +10,8 @@ import (
 )
 
 type GetExtensionListQuery struct {
-	ExtensionGroupId *int `form:"extension_group_id" binding:"omitempty,gt=0"`
+	ExtensionGroupId   *int    `form:"extension_group_id" binding:"omitempty,gt=0"`
+	ExtensionGroupUuid *string `json:"extension_group_uuid" binding:"omitempty"`
 
 	ExtensionId   *int    `form:"extension_id" binding:"omitempty,gt=0"`
 	ExtensionName *string `form:"extension_name" binding:"omitempty"`
@@ -28,6 +29,10 @@ func GetExtensionList(c *rx.Context) {
 
 	if query.ExtensionGroupId != nil {
 		db = db.Where("extension_group_id = ?", *query.ExtensionGroupId)
+	}
+
+	if query.ExtensionGroupUuid != nil {
+		db = db.Where("extension_group_uuid = ?", *query.ExtensionGroupUuid)
 	}
 
 	if query.ExtensionId != nil {
@@ -51,8 +56,8 @@ func GetExtensionList(c *rx.Context) {
 }
 
 type AddExtensionPayload struct {
-	ExtensionGroupId   int    `json:"extension_group_id"`
-	ExtensionGroupUuid string `json:"extension_group_uuid"`
+	ExtensionGroupId   int     `json:"extension_group_id"`
+	ExtensionGroupUuid *string `json:"extension_group_uuid" binding:"omitempty"`
 
 	ExtensionName string `json:"extension_name"`
 }
@@ -66,10 +71,13 @@ func AddExtension(c *rx.Context) {
 	}
 
 	var extensionGroup rdMarket.ExtensionGroup
-	extensionGroupResult := storage.RdPostgres.
-		Where("extension_group_id = ?", payload.ExtensionGroupId).
-		Where("extension_group_uuid = ?", payload.ExtensionGroupUuid).
-		First(&extensionGroup)
+	db := storage.RdPostgres.Where("extension_group_id = ?", payload.ExtensionGroupId)
+
+	if payload.ExtensionGroupUuid != nil {
+		db = db.Where("extension_group_uuid = ?", *payload.ExtensionGroupUuid)
+	}
+
+	extensionGroupResult := db.First(&extensionGroup)
 
 	if extensionGroupResult.Error != nil {
 		c.FailWithMessage("扩展组无效", nil)
