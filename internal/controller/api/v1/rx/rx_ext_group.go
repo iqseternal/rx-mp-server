@@ -37,7 +37,7 @@ func GetExtensionGroupList(c *rx.Context) {
 		db = db.Where("extension_group_name like ?", "%"+*query.ExtensionGroupName+"%")
 	}
 
-	db = db.Order("updated_time desc")
+	db = db.Order("created_time desc")
 
 	if err := db.Model(&rdMarket.ExtensionGroup{}).Count(&total).Error; err != nil {
 		c.FailWithMessage(err.Error(), nil)
@@ -180,6 +180,7 @@ type ModifyExtensionGroupPayload struct {
 
 	ExtensionGroupName *string `json:"extension_group_name" binding:"omitempty"`
 	Description        *string `json:"description" binding:"omitempty"`
+	Enabled            *int    `json:"enabled" binding:"omitempty"`
 }
 
 func ModifyExtensionGroup(c *rx.Context) {
@@ -205,6 +206,10 @@ func ModifyExtensionGroup(c *rx.Context) {
 
 	if payload.Description != nil {
 		updates["description"] = *payload.Description
+	}
+
+	if payload.Enabled != nil {
+		updates["enabled"] = payload.Enabled
 	}
 
 	if len(updates) == 0 {
