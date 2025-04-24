@@ -12,6 +12,9 @@ import (
 type GetGetExtensionGroupListQuery struct {
 	ExtensionGroupId   *int    `form:"extension_group_id" binding:"omitempty,gt=0"`
 	ExtensionGroupName *string `form:"extension_group_name" binding:"omitempty"`
+
+	Page     *int `form:"page" binding:"omitempty,gt=0"`
+	PageSize *int `form:"page_size" binding:"omitempty,gt=0"`
 }
 
 func GetExtensionGroupList(c *rx.Context) {
@@ -21,6 +24,7 @@ func GetExtensionGroupList(c *rx.Context) {
 		return
 	}
 
+	var total int64
 	var extensionGroupList []rdMarket.ExtensionGroup
 	db := storage.RdPostgres.
 		Where("COALESCE((status->>'is_deleted')::boolean, false) = ?", false)
@@ -33,16 +37,26 @@ func GetExtensionGroupList(c *rx.Context) {
 		db = db.Where("extension_group_name like ?", "%"+*query.ExtensionGroupName+"%")
 	}
 
-	db = db.Order("updated_time desc")
+	db = db.Order("created_time desc")
 
-	result := db.Find(&extensionGroupList)
-
-	if result.Error != nil {
-		c.FailWithMessage(result.Error.Error(), nil)
+	if err := db.Model(&rdMarket.ExtensionGroup{}).Count(&total).Error; err != nil {
+		c.FailWithMessage(err.Error(), nil)
 		return
 	}
 
-	c.Ok(extensionGroupList)
+	if query.Page != nil && query.PageSize != nil {
+		db = db.Offset((*query.Page - 1) * *query.PageSize).Limit(*query.PageSize)
+	}
+
+	if err := db.Find(&extensionGroupList).Error; err != nil {
+		c.FailWithMessage(err.Error(), nil)
+		return
+	}
+
+	c.Ok(&rx.H{
+		"list":  extensionGroupList,
+		"total": total,
+	})
 }
 
 type AddExtensionGroupPayload struct {
@@ -77,9 +91,13 @@ func AddExtensionGroup(c *rx.Context) {
 	c.Ok(result.Row())
 }
 
+type DelExtensionGroupCertificate struct {
+	ExtensionGroupId   int    `json:"extension_group_id" binding:"required,gt=0"`
+	ExtensionGroupUuid string `json:"extension_group_uuid" binding:"required,uuid"`
+}
+
 type DelExtensionGroupPayload struct {
-	ExtensionGroupId   int    `json:"extension_group_id" binding:"required"`
-	ExtensionGroupUuid string `json:"extension_group_uuid" binding:"required"`
+	Certificates []DelExtensionGroupCertificate `json:"certificates" binding:"required,gt=0,dive"`
 }
 
 func DelExtensionGroup(c *rx.Context) {
@@ -95,19 +113,26 @@ func DelExtensionGroup(c *rx.Context) {
 		return
 	}
 
-	updates := make(map[string]interface{})
-	updates["updater_id"] = &user.UserID
-	updates["status"] = gorm.Expr(
-		"jsonb_set(status, '{is_deleted}', ?)",
-		true,
-	)
+	db := storage.RdPostgres
+	var orConditions [][]interface{}
+	for _, item := range payload.Certificates {
+		orConditions = append(orConditions, []interface{}{item.ExtensionGroupId, item.ExtensionGroupUuid})
+	}
 
-	result := storage.RdPostgres.
-		Model(&rdMarket.ExtensionGroup{}).
+	db = db.Model(&rdMarket.ExtensionGroup{}).
 		Where("COALESCE((status->>'is_deleted')::boolean, false) = ?", false).
-		Where("extension_group_id = ?", payload.ExtensionGroupId).
-		Where("extension_group_uuid = ?", payload.ExtensionGroupUuid).
-		Updates(updates)
+		Where("(extension_group_id, extension_group_uuid) in ?", orConditions)
+
+	// 执行批量更新
+	updates := map[string]interface{}{
+		"updater_id": user.UserID,
+		"status": gorm.Expr(
+			"jsonb_set(status, '{is_deleted}', ?)",
+			true,
+		),
+	}
+
+	result := db.Updates(updates)
 
 	if result.Error != nil {
 		c.FailWithCodeMessage(biz.DatabaseQueryError, result.Error.Error(), nil)
@@ -155,6 +180,7 @@ type ModifyExtensionGroupPayload struct {
 
 	ExtensionGroupName *string `json:"extension_group_name" binding:"omitempty"`
 	Description        *string `json:"description" binding:"omitempty"`
+	Enabled            *int    `json:"enabled" binding:"omitempty"`
 }
 
 func ModifyExtensionGroup(c *rx.Context) {
@@ -180,6 +206,10 @@ func ModifyExtensionGroup(c *rx.Context) {
 
 	if payload.Description != nil {
 		updates["description"] = *payload.Description
+	}
+
+	if payload.Enabled != nil {
+		updates["enabled"] = payload.Enabled
 	}
 
 	if len(updates) == 0 {

@@ -43,7 +43,7 @@ func GetExtensionList(c *rx.Context) {
 		db = db.Where("extension_name like ?", "%"+*query.ExtensionName+"%")
 	}
 
-	db = db.Order("updated_time desc")
+	db = db.Order("created_time desc")
 
 	result := db.Find(&extensionList)
 
