@@ -198,7 +198,7 @@ func ModifyExtensionGroup(c *rx.Context) {
 
 	// 动态构建更新字段
 	updates := make(map[string]interface{})
-	updates["creator_id"] = &user.UserID
+	updates["updater_id"] = &user.UserID
 
 	if payload.ExtensionGroupName != nil {
 		updates["extension_group_name"] = *payload.ExtensionGroupName
