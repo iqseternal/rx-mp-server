@@ -10,11 +10,13 @@ import (
 )
 
 type GetExtensionListQuery struct {
-	ExtensionGroupId   *int    `form:"extension_group_id" binding:"omitempty,gt=0"`
-	ExtensionGroupUuid *string `json:"extension_group_uuid" binding:"omitempty"`
+	ExtensionGroupId *int `form:"extension_group_id" binding:"omitempty,gt=0"`
 
 	ExtensionId   *int    `form:"extension_id" binding:"omitempty,gt=0"`
 	ExtensionName *string `form:"extension_name" binding:"omitempty"`
+
+	Page     *int `form:"page" binding:"omitempty,gt=0"`
+	PageSize *int `form:"page_size" binding:"omitempty,gt=0"`
 }
 
 func GetExtensionList(c *rx.Context) {
@@ -24,15 +26,12 @@ func GetExtensionList(c *rx.Context) {
 		return
 	}
 
+	var total int64
 	var extensionList []rdMarket.Extension
 	db := storage.RdPostgres.Where("COALESCE((status->>'is_deleted')::boolean, false) = ?", false)
 
 	if query.ExtensionGroupId != nil {
 		db = db.Where("extension_group_id = ?", *query.ExtensionGroupId)
-	}
-
-	if query.ExtensionGroupUuid != nil {
-		db = db.Where("extension_group_uuid = ?", *query.ExtensionGroupUuid)
 	}
 
 	if query.ExtensionId != nil {
@@ -44,6 +43,14 @@ func GetExtensionList(c *rx.Context) {
 	}
 
 	db = db.Order("created_time desc")
+	if err := db.Model(&rdMarket.Extension{}).Count(&total).Error; err != nil {
+		c.FailWithMessage(err.Error(), nil)
+		return
+	}
+
+	if query.Page != nil && query.PageSize != nil {
+		db = db.Offset((*query.Page - 1) * *query.PageSize).Limit(*query.PageSize)
+	}
 
 	result := db.Find(&extensionList)
 
@@ -52,14 +59,18 @@ func GetExtensionList(c *rx.Context) {
 		return
 	}
 
-	c.Ok(extensionList)
+	c.Ok(&rx.H{
+		"list":  extensionList,
+		"total": total,
+	})
 }
 
 type AddExtensionPayload struct {
 	ExtensionGroupId   int     `json:"extension_group_id"`
 	ExtensionGroupUuid *string `json:"extension_group_uuid" binding:"omitempty"`
 
-	ExtensionName string `json:"extension_name"`
+	ExtensionName string `json:"extension_name" binding:"required"`
+	Description   string `json:"description" binding:"omitempty"`
 }
 
 // AddExtension 添加一个插件, 默认直接创建一个版本, 然后再创建一个活跃的插件
@@ -94,6 +105,7 @@ func AddExtension(c *rx.Context) {
 		ExtensionGroupId: payload.ExtensionGroupId,
 		ExtensionName:    payload.ExtensionName,
 		CreatorID:        &user.UserID,
+		Description:      &payload.Description,
 	})
 
 	if result.Error != nil {

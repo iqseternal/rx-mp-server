@@ -15,6 +15,7 @@ type Extension struct {
 	UseVersion       *int        `json:"use_version" gorm:"type:int;"`
 	ScriptHash       *string     `json:"script_hash" gorm:"type:text;"`
 	Metadata         interface{} `json:"metadata" gorm:"type:jsonb;default:'{}';serializer:json;not null;"`
+	Description      *string     `json:"description" gorm:"type:varchar;comment:'描述信息'"`
 
 	Status ExtensionStatusField `json:"status" gorm:"type:jsonb;default:'{}';serializer:json;not null;"`
 
