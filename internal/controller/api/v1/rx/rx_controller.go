@@ -8,22 +8,27 @@ import (
 )
 
 func RegisterRXController(router *gin.Engine) {
-
-	routerGroup := router.Group("")
-	routerGroup.Use(middleware.ResourceAccessControlMiddleware())
+	extensionRXOperatorGroup := router.Group("")
+	extensionRXOperatorGroup.Use(middleware.ResourceAccessControlMiddleware())
 	{
-		routerGroup.GET("/api/v1/rx/ext/get_ext_group_list", rx.WrapHandler(GetExtensionGroupList))
+		extensionRXOperatorGroup.GET("/api/v1/rx/ext/get_ext_group_list", rx.WrapHandler(GetExtensionGroupList))
 
-		routerGroup.PUT("/api/v1/rx/ext/ext_group", rx.WrapHandler(AddExtensionGroup))
-		routerGroup.DELETE("/api/v1/rx/ext/ext_group", rx.WrapHandler(DelExtensionGroup))
-		routerGroup.GET("/api/v1/rx/ext/ext_group", rx.WrapHandler(GetExtensionGroup))
-		routerGroup.POST("/api/v1/rx/ext/ext_group", rx.WrapHandler(ModifyExtensionGroup))
+		extensionRXOperatorGroup.PUT("/api/v1/rx/ext/ext_group", rx.WrapHandler(AddExtensionGroup))
+		extensionRXOperatorGroup.DELETE("/api/v1/rx/ext/ext_group", rx.WrapHandler(DelExtensionGroup))
+		extensionRXOperatorGroup.GET("/api/v1/rx/ext/ext_group", rx.WrapHandler(GetExtensionGroup))
+		extensionRXOperatorGroup.POST("/api/v1/rx/ext/ext_group", rx.WrapHandler(ModifyExtensionGroup))
 
-		routerGroup.GET("/api/v1/rx/ext/get_ext_list", rx.WrapHandler(GetExtensionList))
+		extensionRXOperatorGroup.GET("/api/v1/rx/ext/get_ext_list", rx.WrapHandler(GetExtensionList))
 
-		routerGroup.PUT("/api/v1/rx/ext/ext", rx.WrapHandler(AddExtension))
-		routerGroup.DELETE("/api/v1/rx/ext/ext", rx.WrapHandler(DelExtension))
-		routerGroup.GET("/api/v1/rx/ext/ext", rx.WrapHandler(GetExtension))
-		routerGroup.POST("/api/v1/rx/ext/ext", rx.WrapHandler(ModifyExtension))
+		extensionRXOperatorGroup.PUT("/api/v1/rx/ext/ext", rx.WrapHandler(AddExtension))
+		extensionRXOperatorGroup.DELETE("/api/v1/rx/ext/ext", rx.WrapHandler(DelExtension))
+		extensionRXOperatorGroup.GET("/api/v1/rx/ext/ext", rx.WrapHandler(GetExtension))
+		extensionRXOperatorGroup.POST("/api/v1/rx/ext/ext", rx.WrapHandler(ModifyExtension))
+	}
+
+	extensionPublicGroup := router.Group("")
+	{
+		extensionPublicGroup.GET("/api/v1/rx/ext/use", rx.WrapHandler(UseExtension))
+		extensionPublicGroup.GET("/api/v1/rx/ext/use_group", rx.WrapHandler(UseExtensionGroup))
 	}
 }

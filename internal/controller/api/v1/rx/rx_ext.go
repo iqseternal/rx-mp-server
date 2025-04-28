@@ -2,19 +2,21 @@ package v1RX
 
 import (
 	"gorm.io/gorm"
-	"net/http"
 	"rx-mp/internal/biz"
 	rdMarket "rx-mp/internal/models/rd/rx_market"
+	"rx-mp/internal/pkg/mbic"
 	"rx-mp/internal/pkg/rx"
 	"rx-mp/internal/pkg/storage"
 )
 
 type GetExtensionListQuery struct {
-	ExtensionGroupId   *int    `form:"extension_group_id" binding:"omitempty,gt=0"`
-	ExtensionGroupUuid *string `json:"extension_group_uuid" binding:"omitempty"`
+	ExtensionGroupId *int `form:"extension_group_id" binding:"omitempty,gt=0"`
 
 	ExtensionId   *int    `form:"extension_id" binding:"omitempty,gt=0"`
 	ExtensionName *string `form:"extension_name" binding:"omitempty"`
+
+	Page     *int `form:"page" binding:"omitempty,gt=0"`
+	PageSize *int `form:"page_size" binding:"omitempty,gt=0"`
 }
 
 func GetExtensionList(c *rx.Context) {
@@ -24,15 +26,12 @@ func GetExtensionList(c *rx.Context) {
 		return
 	}
 
+	var total int64
 	var extensionList []rdMarket.Extension
 	db := storage.RdPostgres.Where("COALESCE((status->>'is_deleted')::boolean, false) = ?", false)
 
 	if query.ExtensionGroupId != nil {
 		db = db.Where("extension_group_id = ?", *query.ExtensionGroupId)
-	}
-
-	if query.ExtensionGroupUuid != nil {
-		db = db.Where("extension_group_uuid = ?", *query.ExtensionGroupUuid)
 	}
 
 	if query.ExtensionId != nil {
@@ -44,6 +43,14 @@ func GetExtensionList(c *rx.Context) {
 	}
 
 	db = db.Order("created_time desc")
+	if err := db.Model(&rdMarket.Extension{}).Count(&total).Error; err != nil {
+		c.FailWithMessage(err.Error(), nil)
+		return
+	}
+
+	if query.Page != nil && query.PageSize != nil {
+		db = db.Offset((*query.Page - 1) * *query.PageSize).Limit(*query.PageSize)
+	}
 
 	result := db.Find(&extensionList)
 
@@ -52,18 +59,28 @@ func GetExtensionList(c *rx.Context) {
 		return
 	}
 
-	c.Ok(extensionList)
+	c.Ok(&rx.H{
+		"list":  extensionList,
+		"total": total,
+	})
 }
 
 type AddExtensionPayload struct {
 	ExtensionGroupId   int     `json:"extension_group_id"`
 	ExtensionGroupUuid *string `json:"extension_group_uuid" binding:"omitempty"`
 
-	ExtensionName string `json:"extension_name"`
+	ExtensionName string `json:"extension_name" binding:"required"`
+	Description   string `json:"description" binding:"omitempty"`
 }
 
 // AddExtension 添加一个插件, 默认直接创建一个版本, 然后再创建一个活跃的插件
 func AddExtension(c *rx.Context) {
+	user, err := mbic.GetMBICUser(c.Context)
+	if err != nil {
+		c.FailWithCodeMessage(biz.MBICQueryError, err.Error(), nil)
+		return
+	}
+
 	var payload AddExtensionPayload
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		c.FailWithCodeMessage(biz.ParameterError, err.Error(), nil)
@@ -87,6 +104,8 @@ func AddExtension(c *rx.Context) {
 	result := storage.RdPostgres.Create(&rdMarket.Extension{
 		ExtensionGroupId: payload.ExtensionGroupId,
 		ExtensionName:    payload.ExtensionName,
+		CreatorID:        &user.UserID,
+		Description:      &payload.Description,
 	})
 
 	if result.Error != nil {
@@ -103,19 +122,31 @@ type DelExtensionPayload struct {
 }
 
 func DelExtension(c *rx.Context) {
+	user, err := mbic.GetMBICUser(c.Context)
+	if err != nil {
+		c.FailWithCodeMessage(biz.MBICQueryError, err.Error(), nil)
+		return
+	}
+
 	var payload DelExtensionPayload
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		c.FailWithCodeMessage(biz.ParameterError, err.Error(), nil)
 		return
 	}
 
-	result := storage.RdPostgres.
-		Where("extension_id = ?", payload.ExtensionId).
-		Where("extension_uuid = ?", payload.ExtensionUuid).
-		Update("status", gorm.Expr(
+	updates := map[string]interface{}{
+		"updater_id": user.UserID,
+		"status": gorm.Expr(
 			"jsonb_set(status, '{is_deleted}', ?)",
 			true,
-		))
+		),
+	}
+
+	result := storage.RdPostgres.
+		Where("COALESCE((status->>'is_deleted')::boolean, false) = ?", false).
+		Where("extension_id = ?", payload.ExtensionId).
+		Where("extension_uuid = ?", payload.ExtensionUuid).
+		Updates(updates)
 
 	if result.Error != nil {
 		c.FailWithCodeMessage(biz.DatabaseQueryError, result.Error.Error(), nil)
@@ -144,6 +175,7 @@ func GetExtension(c *rx.Context) {
 
 	var extension rdMarket.Extension
 	result := storage.RdPostgres.
+		Where("COALESCE((status->>'is_deleted')::boolean, false) = ?", false).
 		Where("extension_id = ?", query.ExtensionId).
 		Where("extension_uuid = ?", query.ExtensionUuid).
 		First(&extension)
@@ -156,26 +188,75 @@ func GetExtension(c *rx.Context) {
 	c.Ok(extension)
 }
 
+type ModifyExtensionPayload struct {
+	ExtensionId   int    `form:"extension_id" binding:"required"`
+	ExtensionUuid string `form:"extension_uuid" binding:"required"`
+
+	ExtensionName *string      `form:"extension_name" binding:"omitempty"`
+	Metadata      *interface{} `form:"metadata" binding:"omitempty"`
+	Enabled       *bool        `form:"enabled" binding:"omitempty"`
+}
+
 func ModifyExtension(c *rx.Context) {
-	c.Finish(http.StatusMethodNotAllowed, &rx.R{
-		Code:    biz.NotImplemented,
-		Message: biz.Message(biz.NotImplemented),
-		Data:    nil,
-	})
+	user, err := mbic.GetMBICUser(c.Context)
+	if err != nil {
+		c.FailWithCodeMessage(biz.MBICQueryError, err.Error(), nil)
+		return
+	}
+
+	var payload ModifyExtensionPayload
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		c.FailWithCodeMessage(biz.ParameterError, err.Error(), nil)
+		return
+	}
+
+	// 动态构建更新字段
+	updates := make(map[string]interface{})
+	updates["updater_id"] = &user.UserID
+
+	if payload.ExtensionName != nil {
+		updates["extension_name"] = *payload.ExtensionName
+	}
+
+	if payload.Metadata != nil {
+		updates["metadata"] = *payload.Metadata
+	}
+
+	if payload.Enabled != nil {
+		updates["enabled"] = payload.Enabled
+	}
+
+	if len(updates) == 0 {
+		c.FailWithCode(biz.AttemptUpdateInValidData, nil)
+		return
+	}
+
+	result := storage.RdPostgres.
+		Model(&rdMarket.Extension{}).
+		Where("COALESCE((status->>'is_deleted')::boolean, false) = ?", false).
+		Where("extension_id = ?", payload.ExtensionId).
+		Where("extension_uuid = ?", payload.ExtensionUuid).
+		Updates(updates) // 一次性更新所有字段
+
+	if result.Error != nil {
+		c.FailWithCodeMessage(biz.DatabaseQueryError, result.Error.Error(), nil)
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		c.FailWithCode(biz.AttemptUpdateInValidData, nil)
+		return
+	}
+
+	c.Ok(nil)
 }
 
-func ActiveExtension(c *rx.Context) {
-	c.Finish(http.StatusMethodNotAllowed, &rx.R{
-		Code:    biz.NotImplemented,
-		Message: biz.Message(biz.NotImplemented),
-		Data:    nil,
-	})
+// UseExtension public: 对接某个扩展
+func UseExtension(c *rx.Context) {
+
 }
 
-func DeactiveExtension(c *rx.Context) {
-	c.Finish(http.StatusMethodNotAllowed, &rx.R{
-		Code:    biz.NotImplemented,
-		Message: biz.Message(biz.NotImplemented),
-		Data:    nil,
-	})
+// UseExtensionGroup public: 对接某个插件组
+func UseExtensionGroup(c *rx.Context) {
+
 }
