@@ -24,6 +24,8 @@ func RegisterRXController(router *gin.Engine) {
 		extensionRXOperatorGroup.DELETE("/api/v1/rx/ext/ext", rx.WrapHandler(DelExtension))
 		extensionRXOperatorGroup.GET("/api/v1/rx/ext/ext", rx.WrapHandler(GetExtension))
 		extensionRXOperatorGroup.POST("/api/v1/rx/ext/ext", rx.WrapHandler(ModifyExtension))
+
+		extensionRXOperatorGroup.GET("/api/v1/rx/ext/version", rx.WrapHandler(GetExtensionVersionList))
 	}
 
 	extensionPublicGroup := router.Group("")

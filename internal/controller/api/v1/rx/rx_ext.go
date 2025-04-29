@@ -10,9 +10,9 @@ import (
 )
 
 type GetExtensionListQuery struct {
-	ExtensionGroupId *int `form:"extension_group_id" binding:"omitempty,gt=0"`
+	ExtensionGroupId *int64 `form:"extension_group_id" binding:"omitempty,gt=0"`
 
-	ExtensionId   *int    `form:"extension_id" binding:"omitempty,gt=0"`
+	ExtensionId   *int64  `form:"extension_id" binding:"omitempty,gt=0"`
 	ExtensionName *string `form:"extension_name" binding:"omitempty"`
 
 	Page     *int `form:"page" binding:"omitempty,gt=0"`
@@ -44,7 +44,7 @@ func GetExtensionList(c *rx.Context) {
 
 	db = db.Order("created_time desc")
 	if err := db.Model(&rdMarket.Extension{}).Count(&total).Error; err != nil {
-		c.FailWithMessage(err.Error(), nil)
+		c.FailWithCodeMessage(biz.DatabaseQueryError, err.Error(), nil)
 		return
 	}
 
@@ -55,7 +55,7 @@ func GetExtensionList(c *rx.Context) {
 	result := db.Find(&extensionList)
 
 	if result.Error != nil {
-		c.FailWithMessage(result.Error.Error(), nil)
+		c.FailWithCodeMessage(biz.DatabaseQueryError, result.Error.Error(), nil)
 		return
 	}
 
@@ -66,7 +66,7 @@ func GetExtensionList(c *rx.Context) {
 }
 
 type AddExtensionPayload struct {
-	ExtensionGroupId   int     `json:"extension_group_id"`
+	ExtensionGroupId   int64   `json:"extension_group_id"`
 	ExtensionGroupUuid *string `json:"extension_group_uuid" binding:"omitempty"`
 
 	ExtensionName string `json:"extension_name" binding:"required"`
@@ -117,7 +117,7 @@ func AddExtension(c *rx.Context) {
 }
 
 type DelExtensionPayload struct {
-	ExtensionId   int    `json:"extension_id" binding:"required"`
+	ExtensionId   int64  `json:"extension_id" binding:"required"`
 	ExtensionUuid string `json:"extension_uuid" binding:"required"`
 }
 
@@ -162,7 +162,7 @@ func DelExtension(c *rx.Context) {
 }
 
 type GetExtensionQuery struct {
-	ExtensionId   int    `form:"extension_id" binding:"required"`
+	ExtensionId   int64  `form:"extension_id" binding:"required"`
 	ExtensionUuid string `form:"extension_uuid" binding:"required"`
 }
 
@@ -189,7 +189,7 @@ func GetExtension(c *rx.Context) {
 }
 
 type ModifyExtensionPayload struct {
-	ExtensionId   int    `form:"extension_id" binding:"required"`
+	ExtensionId   int64  `form:"extension_id" binding:"required"`
 	ExtensionUuid string `form:"extension_uuid" binding:"required"`
 
 	ExtensionName *string      `form:"extension_name" binding:"omitempty"`
