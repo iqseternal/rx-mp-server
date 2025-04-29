@@ -3,7 +3,7 @@ package rdClient
 import "time"
 
 type User struct {
-	UserID   uint    `json:"user_id"  gorm:"primaryKey;autoIncrement;not null"`  // 主键，自增，不能为空
+	UserID   uint64  `json:"user_id"  gorm:"primaryKey;autoIncrement;not null"`  // 主键，自增，不能为空
 	Username string  `json:"username" gorm:"type:varchar(255);not null;"`        // 用户名唯一，不能为空，最大长度为100
 	Email    string  `json:"email"    gorm:"type:varchar(255);unique;not null;"` // 邮箱唯一，不能为空，最大长度为255
 	Password *string `json:"password" gorm:"type:varchar(300);"`                 // 密码不能为空，最大长度为255（哈希值）

@@ -8,19 +8,19 @@ type ExtensionStatusField struct {
 
 // Extension 插件
 type Extension struct {
-	ExtensionId      int         `json:"extension_id" gorm:"primaryKey;autoIncrement;comment:'自增主键'"`
-	ExtensionGroupId int         `json:"extension_group_id" gorm:"type:int;not null;"`
+	ExtensionId      int64       `json:"extension_id" gorm:"primaryKey;autoIncrement;comment:'自增主键'"`
+	ExtensionGroupId int64       `json:"extension_group_id" gorm:"type:int;not null;"`
 	ExtensionUuid    string      `json:"extension_uuid" gorm:"default:gen_random_uuid();not null;comment:'唯一标识'"`
 	ExtensionName    string      `json:"extension_name" gorm:"not null;comment:'分组名称'"`
-	UseVersion       *int        `json:"use_version" gorm:"type:int;"`
+	UseVersion       *int64      `json:"use_version" gorm:"type:int;"`
 	ScriptHash       *string     `json:"script_hash" gorm:"type:text;"`
 	Metadata         interface{} `json:"metadata" gorm:"type:jsonb;default:'{}';serializer:json;not null;"`
 	Description      *string     `json:"description" gorm:"type:varchar;comment:'描述信息'"`
 
 	Status ExtensionStatusField `json:"status" gorm:"type:jsonb;default:'{}';serializer:json;not null;"`
 
-	CreatorID *uint `json:"creator_id" gorm:"type:int;"`
-	UpdaterID *uint `json:"updater_id" gorm:"type:int;"`
+	CreatorID *uint64 `json:"creator_id" gorm:"type:int;"`
+	UpdaterID *uint64 `json:"updater_id" gorm:"type:int;"`
 
 	CreatedTime time.Time `json:"created_time" gorm:"autoCreateTime;default:CURRENT_TIMESTAMP;not null"`
 	UpdatedTime time.Time `json:"updated_time" gorm:"autoUpdateTime;default:CURRENT_TIMESTAMP;not null"`

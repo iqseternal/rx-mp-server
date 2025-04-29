@@ -10,7 +10,7 @@ import (
 )
 
 type GetGetExtensionGroupListQuery struct {
-	ExtensionGroupId   *int    `form:"extension_group_id" binding:"omitempty,gt=0"`
+	ExtensionGroupId   *int64  `form:"extension_group_id" binding:"omitempty,gt=0"`
 	ExtensionGroupName *string `form:"extension_group_name" binding:"omitempty"`
 
 	Page     *int `form:"page" binding:"omitempty,gt=0"`
@@ -37,19 +37,19 @@ func GetExtensionGroupList(c *rx.Context) {
 		db = db.Where("extension_group_name like ?", "%"+*query.ExtensionGroupName+"%")
 	}
 
-	db = db.Order("created_time desc")
-
 	if err := db.Model(&rdMarket.ExtensionGroup{}).Count(&total).Error; err != nil {
-		c.FailWithMessage(err.Error(), nil)
+		c.FailWithCodeMessage(biz.DatabaseQueryError, err.Error(), nil)
 		return
 	}
+
+	db = db.Order("created_time desc")
 
 	if query.Page != nil && query.PageSize != nil {
 		db = db.Offset((*query.Page - 1) * *query.PageSize).Limit(*query.PageSize)
 	}
 
 	if err := db.Find(&extensionGroupList).Error; err != nil {
-		c.FailWithMessage(err.Error(), nil)
+		c.FailWithCodeMessage(biz.DatabaseQueryError, err.Error(), nil)
 		return
 	}
 
@@ -60,8 +60,8 @@ func GetExtensionGroupList(c *rx.Context) {
 }
 
 type AddExtensionGroupPayload struct {
-	ExtensionGroupName string `json:"extension_group_name" binding:"required"`
-	Description        string `json:"description" binding:"omitempty"`
+	ExtensionGroupName string  `json:"extension_group_name" binding:"required"`
+	Description        *string `json:"description" binding:"omitempty"`
 }
 
 func AddExtensionGroup(c *rx.Context) {
@@ -79,7 +79,7 @@ func AddExtensionGroup(c *rx.Context) {
 
 	result := storage.RdPostgres.Create(&rdMarket.ExtensionGroup{
 		ExtensionGroupName: payload.ExtensionGroupName,
-		Description:        payload.Description,
+		Description:        *payload.Description,
 		CreatorID:          &user.UserID,
 	})
 
@@ -92,7 +92,7 @@ func AddExtensionGroup(c *rx.Context) {
 }
 
 type DelExtensionGroupCertificate struct {
-	ExtensionGroupId   int    `json:"extension_group_id" binding:"required,gt=0"`
+	ExtensionGroupId   int64  `json:"extension_group_id" binding:"required,gt=0"`
 	ExtensionGroupUuid string `json:"extension_group_uuid" binding:"required,uuid"`
 }
 
@@ -148,7 +148,7 @@ func DelExtensionGroup(c *rx.Context) {
 }
 
 type GetExtensionGroupQuery struct {
-	ExtensionGroupId   *int    `form:"extension_group_id" binding:"required"`
+	ExtensionGroupId   *int64  `form:"extension_group_id" binding:"required"`
 	ExtensionGroupUuid *string `form:"extension_group_uuid" binding:"required"`
 }
 
@@ -175,7 +175,7 @@ func GetExtensionGroup(c *rx.Context) {
 }
 
 type ModifyExtensionGroupPayload struct {
-	ExtensionGroupId   int    `json:"extension_group_id" binding:"required"`
+	ExtensionGroupId   int64  `json:"extension_group_id" binding:"required"`
 	ExtensionGroupUuid string `json:"extension_group_uuid" binding:"required"`
 
 	ExtensionGroupName *string `json:"extension_group_name" binding:"omitempty"`
