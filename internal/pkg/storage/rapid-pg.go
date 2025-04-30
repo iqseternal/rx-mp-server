@@ -3,6 +3,8 @@ package storage
 import (
 	"fmt"
 	"rx-mp/config"
+	rdClient "rx-mp/internal/models/rd/client"
+	rdMarket "rx-mp/internal/models/rd/rx_market"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -35,10 +37,49 @@ func init() {
 	RdPostgres = db
 }
 
-// refactoringRdClient 重新建立 rapid.client 表结构
-func refactoringRdClient(db *gorm.DB) {
+// refactoringTable 重新建立 rapid.client 表结构
+func refactoringTable(db *gorm.DB) error {
 	if true {
 		fmt.Println("重构表结构? 如果确信操作, 请注释 return 块")
-		return
+		return nil
 	}
+
+	err := db.AutoMigrate(
+		&rdClient.User{},
+		&rdClient.Group{},
+		&rdClient.GroupUser{},
+		&rdClient.Organization{},
+		&rdClient.Role{},
+		&rdClient.UserRole{},
+		&rdClient.Permissions{},
+		&rdClient.RolePermission{},
+	)
+
+	if err != nil {
+		return err
+	}
+
+	err = db.AutoMigrate(
+		&rdMarket.Extension{},
+		&rdMarket.ExtensionGroup{},
+		&rdMarket.ExtensionVersion{},
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func refactoringView(db *gorm.DB) error {
+	return db.Transaction(func(tx *gorm.DB) error {
+
+		// 创建视图 ExtensionVersionView
+		if err := (&rdMarket.ExtensionVersionView{}).CreateView(db); err != nil {
+			return err
+		}
+
+		return nil
+	})
 }

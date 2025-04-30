@@ -9,7 +9,8 @@ import (
 )
 
 type GetGetExtensionVersionListQuery struct {
-	ExtensionId int64 `json:"extension_id" binding:"required"`
+	ExtensionId   int64  `form:"extension_id" binding:"required"`
+	ExtensionUuid string `form:"extension_uuid" binding:"required"`
 
 	Page     *int `form:"page" binding:"omitempty,gt=0"`
 	PageSize *int `form:"page_size" binding:"omitempty,gt=0"`
@@ -29,8 +30,9 @@ func GetExtensionVersionList(c *rx.Context) {
 	var total int64
 	var extensionVersionList []rdMarket.ExtensionVersion
 
-	db := storage.RdPostgres.Model(&rdMarket.ExtensionVersion{}).
-		Where("extension_id = ?", query.ExtensionId)
+	db := storage.RdPostgres.Model(&rdMarket.ExtensionVersion{})
+
+	db = db.Where("extension_id = ?", query.ExtensionId)
 
 	if query.ExtensionVersionId != nil {
 		db = db.Where("extension_version_id = ?", query.ExtensionVersionId)
