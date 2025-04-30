@@ -1,6 +1,8 @@
 package rdMarket
 
-import "time"
+import (
+	"time"
+)
 
 type ExtensionStatusField struct {
 	IsDeleted bool `json:"is_deleted"`
@@ -16,6 +18,7 @@ type Extension struct {
 	ScriptHash       *string     `json:"script_hash" gorm:"type:text;"`
 	Metadata         interface{} `json:"metadata" gorm:"type:jsonb;default:'{}';serializer:json;not null;"`
 	Description      *string     `json:"description" gorm:"type:varchar;comment:'描述信息'"`
+	Enabled          int64       `json:"enabled" gorm:"default:1;not null;comment:'启用状态'"`
 
 	Status ExtensionStatusField `json:"status" gorm:"type:jsonb;default:'{}';serializer:json;not null;"`
 

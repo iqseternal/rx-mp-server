@@ -195,6 +195,7 @@ type ModifyExtensionPayload struct {
 	ExtensionName *string      `form:"extension_name" binding:"omitempty"`
 	Metadata      *interface{} `form:"metadata" binding:"omitempty"`
 	Enabled       *bool        `form:"enabled" binding:"omitempty"`
+	UseVersion    *int         `form:"use_version" binding:"omitempty"`
 }
 
 func ModifyExtension(c *rx.Context) {
@@ -224,6 +225,10 @@ func ModifyExtension(c *rx.Context) {
 
 	if payload.Enabled != nil {
 		updates["enabled"] = payload.Enabled
+	}
+
+	if payload.UseVersion != nil {
+		updates["use_version"] = *payload.UseVersion
 	}
 
 	if len(updates) == 0 {
