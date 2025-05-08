@@ -69,7 +69,8 @@ func GetExtensionVersionList(c *rx.Context) {
 }
 
 type AddExtensionVersionPayload struct {
-	ExtensionId int64 `json:"extension_id" binding:"required"`
+	ExtensionId   int64  `json:"extension_id" binding:"required"`
+	ExtensionUuid string `json:"extension_uuid" binding:"required"`
 
 	ScriptContent string  `json:"script_content" binding:"required"`
 	Description   *string `json:"description" binding:"omitempty,max=255"`
@@ -88,9 +89,25 @@ func AddExtensionVersion(c *rx.Context) {
 		return
 	}
 
+	var extension *rdMarket.Extension
+	extResult := storage.RdPostgres.Model(&rdMarket.Extension{}).
+		Where("extension_id = ?", payload.ExtensionId).
+		Where("extension_uuid = ?", payload.ExtensionUuid).
+		First(extension)
+
+	if extResult.Error != nil {
+		c.FailWithMessage("扩展不存在", nil)
+		return
+	}
+
 	var versions int64
-	if err := storage.RdPostgres.Model(&rdMarket.ExtensionVersion{}).Where("extension_id = ?", payload.ExtensionId).Count(&versions).Error; err != nil {
-		c.FailWithCodeMessage(biz.DatabaseQueryError, err.Error(), nil)
+	extVersionCountResult := storage.RdPostgres.Model(&rdMarket.ExtensionVersion{}).
+		Where("extension_id = ?", payload.ExtensionId).
+		Where("extension_uuid = ?", payload.ExtensionUuid).
+		Count(&versions)
+
+	if extVersionCountResult.Error != nil {
+		c.FailWithCodeMessage(biz.DatabaseQueryError, extVersionCountResult.Error.Error(), nil)
 		return
 	}
 
@@ -108,4 +125,63 @@ func AddExtensionVersion(c *rx.Context) {
 	}
 
 	c.Ok(result.Row())
+}
+
+type UpdateUseExtensionVersionPayload struct {
+	ExtensionId   int64  `json:"extension_id" binding:"required"`
+	ExtensionUuid string `form:"extension_uuid" binding:"required"`
+
+	ExtensionVersionId int64 `json:"extension_version_id" binding:"omitempty"`
+}
+
+func UpdateUseExtensionVersion(c *rx.Context) {
+	user, err := mbic.GetMBICUser(c.Context)
+	if err != nil {
+		c.FailWithCodeMessage(biz.MBICQueryError, err.Error(), nil)
+		return
+	}
+
+	var payload UpdateUseExtensionVersionPayload
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		c.FailWithCodeMessage(biz.ParameterError, err.Error(), nil)
+		return
+	}
+
+	var extension rdMarket.Extension
+	extResult := storage.RdPostgres.Model(&rdMarket.Extension{}).
+		Where("extension_id = ?", payload.ExtensionId).
+		Where("extension_uuid = ?", payload.ExtensionUuid).
+		First(extension)
+
+	if extResult.Error != nil {
+		c.FailWithMessage("扩展不存在", nil)
+		return
+	}
+
+	var extensionVersion rdMarket.ExtensionVersion
+	extVersionResult := storage.RdPostgres.Model(&rdMarket.ExtensionVersion{}).
+		Where("extension_version_id = ?", payload.ExtensionVersionId).
+		First(extensionVersion)
+
+	if extVersionResult.Error != nil {
+		c.FailWithMessage("扩展版本不存在", nil)
+		return
+	}
+
+	updates := map[string]interface{}{
+		"use_version": extensionVersion.ExtensionVersionId,
+		"updater_id":  user.UserID,
+	}
+
+	useVersionResult := storage.RdPostgres.Model(&rdMarket.Extension{}).
+		Where("extension_id = ?", payload.ExtensionId).
+		Where("extension_uuid = ?", payload.ExtensionUuid).
+		Updates(updates)
+
+	if useVersionResult.Error != nil {
+		c.FailWithCodeMessage(biz.DatabaseQueryError, useVersionResult.Error.Error(), nil)
+		return
+	}
+
+	c.Ok(nil)
 }

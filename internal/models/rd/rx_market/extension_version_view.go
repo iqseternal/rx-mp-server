@@ -2,6 +2,7 @@ package rdMarket
 
 import (
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
 	"time"
 )
@@ -50,39 +51,43 @@ func (c *ExtensionVersionView) BeforeSave(db *gorm.DB) error {
 
 // CreateView 创建 rapid.rx_market.extension_version_view 视图
 func (c *ExtensionVersionView) CreateView(db *gorm.DB) error {
-	return db.Exec(`
-		SELECT 
-			extension_version.extension_version_id,
-			extension_version.script_content,
-			extension_version.version,
-			extension_version.description,
-			extension_version.created_time,
-			extension_version.updated_time,
-			extension_version.creator_id,
-			create_user.username AS creator_username,
-			extension_version.updater_id,
-			update_user.username AS updater_username,
-			extension.extension_id,
-			extension.extension_uuid,
-			extension.extension_name,
-			extension.metadata,
-			extension_group.extension_group_id,
-			extension_group.extension_group_uuid,
-			extension_group.extension_group_name,
-			CASE
-				WHEN extension_group.enabled = 0 THEN 0
-				WHEN extension.enabled = 0 THEN 0
-				ELSE 1
-			END AS enabled_status,
-			CASE
-				WHEN extension_group.status ? 'is_deleted'::text AND (extension_group.status ->> 'is_deleted'::text) = 'true'::text THEN 0
-				WHEN extension.status ? 'is_deleted'::text AND (extension.status ->> 'is_deleted'::text) = 'true'::text THEN 0
-				ELSE 1
-			END AS status_result
-		FROM rx_market.extension_version
-			LEFT JOIN rx_market.extension ON extension_version.extension_id = extension.extension_id
-			LEFT JOIN rx_market.extension_group ON extension.extension_group_id = extension_group.extension_group_id
-			LEFT JOIN client."user" create_user ON extension_version.creator_id = create_user.user_id
-			LEFT JOIN client."user" update_user ON extension_version.updater_id = update_user.user_id
-	`).Error
+	createViewSql := fmt.Sprintf(`
+		CREATE VIEW %s AS (
+			SELECT 
+				extension_version.extension_version_id,
+				extension_version.script_content,
+				extension_version.version,
+				extension_version.description,
+				extension_version.created_time,
+				extension_version.updated_time,
+				extension_version.creator_id,
+				create_user.username AS creator_username,
+				extension_version.updater_id,
+				update_user.username AS updater_username,
+				extension.extension_id,
+				extension.extension_uuid,
+				extension.extension_name,
+				extension.metadata,
+				extension_group.extension_group_id,
+				extension_group.extension_group_uuid,
+				extension_group.extension_group_name,
+				CASE
+					WHEN extension_group.enabled = 0 THEN 0
+					WHEN extension.enabled = 0 THEN 0
+					ELSE 1
+				END AS enabled_status,
+				CASE
+					WHEN extension_group.status ? 'is_deleted'::text AND (extension_group.status ->> 'is_deleted'::text) = 'true'::text THEN 0
+					WHEN extension.status ? 'is_deleted'::text AND (extension.status ->> 'is_deleted'::text) = 'true'::text THEN 0
+					ELSE 1
+				END AS status_result
+			FROM rx_market.extension_version
+				LEFT JOIN rx_market.extension ON extension_version.extension_id = extension.extension_id
+				LEFT JOIN rx_market.extension_group ON extension.extension_group_id = extension_group.extension_group_id
+				LEFT JOIN client."user" create_user ON extension_version.creator_id = create_user.user_id
+				LEFT JOIN client."user" update_user ON extension_version.updater_id = update_user.user_id
+		)		
+	`, c.TableName())
+
+	return db.Exec(createViewSql).Error
 }
