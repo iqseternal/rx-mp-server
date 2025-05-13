@@ -12,7 +12,7 @@ type ExtensionStatusField struct {
 type Extension struct {
 	ExtensionId      int64       `json:"extension_id" gorm:"primaryKey;autoIncrement;comment:'自增主键'"`
 	ExtensionGroupId int64       `json:"extension_group_id" gorm:"type:int;not null;"`
-	ExtensionUuid    string      `json:"extension_uuid" gorm:"default:gen_random_uuid();not null;comment:'唯一标识'"`
+	ExtensionUuid    string      `json:"extension_uuid" gorm:"column:extension_uuid;default:gen_random_uuid();not null;comment:'唯一标识'"`
 	ExtensionName    string      `json:"extension_name" gorm:"not null;comment:'分组名称'"`
 	UseVersion       *int64      `json:"use_version" gorm:"type:int;"`
 	ScriptHash       *string     `json:"script_hash" gorm:"type:text;"`

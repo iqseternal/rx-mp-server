@@ -89,14 +89,14 @@ func AddExtensionVersion(c *rx.Context) {
 		return
 	}
 
-	var extension *rdMarket.Extension
+	var extension rdMarket.Extension
 	extResult := storage.RdPostgres.Model(&rdMarket.Extension{}).
 		Where("extension_id = ?", payload.ExtensionId).
 		Where("extension_uuid = ?", payload.ExtensionUuid).
-		First(extension)
+		First(&extension)
 
 	if extResult.Error != nil {
-		c.FailWithMessage("扩展不存在", nil)
+		c.FailWithMessage("无效扩展", nil)
 		return
 	}
 
