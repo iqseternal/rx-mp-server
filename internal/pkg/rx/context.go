@@ -38,6 +38,7 @@ func (c *Context) Ok(data interface{}) {
 	})
 }
 
+// AbortWithOk 立即终止返回成功状态
 func (c *Context) AbortWithOk(data interface{}) {
 	c.Ok(data)
 	c.Abort()
@@ -52,6 +53,7 @@ func (c *Context) OkWithCode(bizCode int, data interface{}) {
 	})
 }
 
+// AbortWithOkCode 立即终止返回成功状态, 伴随自定义状态码
 func (c *Context) AbortWithOkCode(bizCode int, data interface{}) {
 	c.OkWithCode(bizCode, data)
 	c.Abort()
@@ -66,6 +68,7 @@ func (c *Context) OkWithMessage(message string, data interface{}) {
 	})
 }
 
+// OkWithCodeMessage 立即终止返回成功状态
 func (c *Context) OkWithCodeMessage(bizCode int, message string, data interface{}) {
 	c.JSON(http.StatusOK, &R{
 		Code:    bizCode,
@@ -74,6 +77,7 @@ func (c *Context) OkWithCodeMessage(bizCode int, message string, data interface{
 	})
 }
 
+// AbortWithOkMessage 立即终止返回成功状态, 伴随自定义信息
 func (c *Context) AbortWithOkMessage(message string, data interface{}) {
 	c.OkWithMessage(message, data)
 	c.Abort()
@@ -88,6 +92,7 @@ func (c *Context) Fail(data interface{}) {
 	})
 }
 
+// AbortWithFail 立即终止返回失败状态
 func (c *Context) AbortWithFail(data interface{}) {
 	c.Fail(data)
 	c.Abort()
@@ -102,6 +107,7 @@ func (c *Context) FailWithCode(bizCode int, data interface{}) {
 	})
 }
 
+// AbortWithFailCode 立即终止返回失败状态, 伴随自定义状态码
 func (c *Context) AbortWithFailCode(bizCode int, data interface{}) {
 	c.FailWithCode(bizCode, data)
 	c.Abort()
@@ -116,11 +122,13 @@ func (c *Context) FailWithMessage(message string, data interface{}) {
 	})
 }
 
+// AbortWithFailMessage 立即完成中断请求, 返回失败状态, 伴随 自定义信息
 func (c *Context) AbortWithFailMessage(message string, data interface{}) {
 	c.FailWithMessage(message, data)
 	c.Abort()
 }
 
+// FailWithCodeMessage 返回失败状态, 并伴随状态码和自定义信息
 func (c *Context) FailWithCodeMessage(bizCode int, message string, data interface{}) {
 	c.JSON(http.StatusOK, &R{
 		Code:    bizCode,
@@ -134,6 +142,7 @@ func (c *Context) Finish(httpStatus int, r *R) {
 	c.JSON(httpStatus, r)
 }
 
+// AbortFinish 立即完成当前请求
 func (c *Context) AbortFinish(httpStatus int, r *R) {
 	c.Finish(httpStatus, r)
 	c.Abort()

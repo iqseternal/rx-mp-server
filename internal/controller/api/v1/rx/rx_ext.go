@@ -189,13 +189,13 @@ func GetExtension(c *rx.Context) {
 }
 
 type ModifyExtensionPayload struct {
-	ExtensionId   int64  `form:"extension_id" binding:"required"`
-	ExtensionUuid string `form:"extension_uuid" binding:"required"`
+	ExtensionId   int64  `json:"extension_id" binding:"required"`
+	ExtensionUuid string `json:"extension_uuid" binding:"required"`
 
-	ExtensionName *string      `form:"extension_name" binding:"omitempty"`
-	Metadata      *interface{} `form:"metadata" binding:"omitempty"`
-	Enabled       *bool        `form:"enabled" binding:"omitempty"`
-	UseVersion    *int         `form:"use_version" binding:"omitempty"`
+	ExtensionName *string      `json:"extension_name" binding:"omitempty"`
+	Metadata      *interface{} `json:"metadata" binding:"omitempty"`
+	Enabled       *int         `json:"enabled" binding:"omitempty"`
+	UseVersion    *int         `json:"use_version" binding:"omitempty"`
 }
 
 func ModifyExtension(c *rx.Context) {

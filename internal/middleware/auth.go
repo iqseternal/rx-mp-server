@@ -28,6 +28,18 @@ func ResourceAccessControlMiddleware() gin.HandlerFunc {
 		}
 
 		if accessAuthorization.Value == "dev_access_token" {
+			var user *rdClient.User
+
+			result := storage.RdPostgres.Where("user_id = ?", 10).First(&user)
+
+			if result.Error != nil {
+				c.FailWithCode(biz.UserNotExists, nil)
+				c.Abort()
+				return
+			}
+
+			mbic.SetMBICUser(c.Context, user)
+			mbic.SetMBICUserID(c.Context, "10")
 			c.Next()
 			return
 		}
