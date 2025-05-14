@@ -103,7 +103,6 @@ func AddExtensionVersion(c *rx.Context) {
 	var versions int64
 	extVersionCountResult := storage.RdPostgres.Model(&rdMarket.ExtensionVersion{}).
 		Where("extension_id = ?", payload.ExtensionId).
-		Where("extension_uuid = ?", payload.ExtensionUuid).
 		Count(&versions)
 
 	if extVersionCountResult.Error != nil {
@@ -111,13 +110,18 @@ func AddExtensionVersion(c *rx.Context) {
 		return
 	}
 
-	result := storage.RdPostgres.Create(&rdMarket.ExtensionVersion{
+	var newExtensionVersion = rdMarket.ExtensionVersion{
 		ExtensionId:   payload.ExtensionId,
 		Version:       versions + 1,
 		ScriptContent: payload.ScriptContent,
-		Description:   *payload.Description,
 		CreatorID:     &user.UserID,
-	})
+	}
+
+	if payload.Description != nil {
+		newExtensionVersion.Description = *payload.Description
+	}
+
+	result := storage.RdPostgres.Create(&newExtensionVersion)
 
 	if result.Error != nil {
 		c.FailWithCodeMessage(biz.DatabaseQueryError, result.Error.Error(), nil)
