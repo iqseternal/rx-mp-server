@@ -29,7 +29,7 @@ func RegisterRXController(router *gin.Engine) {
 
 		extensionRXOperatorGroup.PUT("/api/v1/rx/ext/ext/version", rx.WrapHandler(AddExtensionVersion))
 
-		extensionRXOperatorGroup.POST("/api/v1/rx/ext/update_use_version", rx.WrapHandler(UpdateUseExtensionVersion))
+		extensionRXOperatorGroup.POST("/api/v1/rx/ext/apply_ext_version", rx.WrapHandler(ApplyExtensionVersion))
 	}
 
 	extensionPublicGroup := router.Group("")

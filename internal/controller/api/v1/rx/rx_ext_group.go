@@ -77,11 +77,16 @@ func AddExtensionGroup(c *rx.Context) {
 		return
 	}
 
-	result := storage.RdPostgres.Create(&rdMarket.ExtensionGroup{
+	var newExtensionGroup = &rdMarket.ExtensionGroup{
 		ExtensionGroupName: payload.ExtensionGroupName,
-		Description:        *payload.Description,
 		CreatorID:          &user.UserID,
-	})
+	}
+
+	if payload.Description != nil {
+		newExtensionGroup.Description = *payload.Description
+	}
+
+	result := storage.RdPostgres.Create(newExtensionGroup)
 
 	if result.Error != nil {
 		c.FailWithCodeMessage(biz.DatabaseQueryError, result.Error.Error(), nil)

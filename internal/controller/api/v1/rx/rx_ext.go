@@ -70,7 +70,8 @@ type AddExtensionPayload struct {
 	ExtensionGroupUuid *string `json:"extension_group_uuid" binding:"omitempty"`
 
 	ExtensionName string `json:"extension_name" binding:"required"`
-	Description   string `json:"description" binding:"omitempty"`
+
+	Description *string `json:"description" binding:"omitempty"`
 }
 
 // AddExtension 添加一个插件, 默认直接创建一个版本, 然后再创建一个活跃的插件
@@ -105,7 +106,7 @@ func AddExtension(c *rx.Context) {
 		ExtensionGroupId: payload.ExtensionGroupId,
 		ExtensionName:    payload.ExtensionName,
 		CreatorID:        &user.UserID,
-		Description:      &payload.Description,
+		Description:      payload.Description,
 	})
 
 	if result.Error != nil {
@@ -254,14 +255,4 @@ func ModifyExtension(c *rx.Context) {
 	}
 
 	c.Ok(nil)
-}
-
-// UseExtension public: 对接某个扩展
-func UseExtension(c *rx.Context) {
-
-}
-
-// UseExtensionGroup public: 对接某个插件组
-func UseExtensionGroup(c *rx.Context) {
-
 }

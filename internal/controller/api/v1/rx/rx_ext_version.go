@@ -131,21 +131,20 @@ func AddExtensionVersion(c *rx.Context) {
 	c.Ok(result.Row())
 }
 
-type UpdateUseExtensionVersionPayload struct {
-	ExtensionId   int64  `json:"extension_id" binding:"required"`
-	ExtensionUuid string `form:"extension_uuid" binding:"required"`
-
-	ExtensionVersionId int64 `json:"extension_version_id" binding:"omitempty"`
+type ApplyExtensionVersionPayload struct {
+	ExtensionId        int64  `json:"extension_id" binding:"required"`
+	ExtensionUuid      string `json:"extension_uuid" binding:"required"`
+	ExtensionVersionId int64  `json:"extension_version_id" binding:"required"`
 }
 
-func UpdateUseExtensionVersion(c *rx.Context) {
+func ApplyExtensionVersion(c *rx.Context) {
 	user, err := mbic.GetMBICUser(c.Context)
 	if err != nil {
 		c.FailWithCodeMessage(biz.MBICQueryError, err.Error(), nil)
 		return
 	}
 
-	var payload UpdateUseExtensionVersionPayload
+	var payload ApplyExtensionVersionPayload
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		c.FailWithCodeMessage(biz.ParameterError, err.Error(), nil)
 		return
@@ -173,7 +172,7 @@ func UpdateUseExtensionVersion(c *rx.Context) {
 	}
 
 	updates := map[string]interface{}{
-		"use_version": extensionVersion.ExtensionVersionId,
+		"use_version": extensionVersion.Version,
 		"updater_id":  user.UserID,
 	}
 
