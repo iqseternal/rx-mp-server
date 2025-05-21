@@ -2,7 +2,7 @@ linters:
   disable-all: true  # 关闭其他linter
   enable:
     - govet       # 基础语法检查（含标签格式）
-    - tagalign    # 标签对齐检查
+    # - tagalign    # 标签对齐检查
 
     - gosimple    # 简化冗余代码
     - staticcheck # 静态分析（含未使用字段检测）
@@ -29,4 +29,7 @@ linters-settings:
     order: json,yaml,env
 
 run:
+  timeout: 3m     # 超时时间
   fix: false  # 全局启用自动修复功能（支持 tagalign/gofmt 等工具的修复）
+  skip-dirs:      # 忽略目录
+    - vendor

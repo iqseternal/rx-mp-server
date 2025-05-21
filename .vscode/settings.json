@@ -1,22 +1,26 @@
 {
-    "sqltools.connections": [
-        {
-            "previewLimit": 50,
-            "server": "oupro.cn",
-            "port": 58063,
-            "driver": "PostgreSQL",
-            "name": "rapid",
-            "database": "rapid",
-            "username": "postgres"
-        }
-    ],
-    "go.lintTool": "golangci-lint",
-    "gopls": {
-        "hints": {
-            "commentTags": true // 启用注释标签提示[8](@ref)
-        }
-    },
-    "editor.codeActionsOnSave": {
-        "source.fixAll": "never"
-    }
+	"sqltools.connections": [
+		{
+			"previewLimit": 50,
+			"server": "oupro.cn",
+			"port": 58063,
+			"driver": "PostgreSQL",
+			"name": "rapid",
+			"database": "rapid",
+			"username": "postgres"
+		}
+	],
+	"go.lintTool": "golangci-lint",
+	"gopls": {
+		"ui.completion.usePlaceholders": true, // 显示参数占位符
+		"analyses.completionDocumentation": true, // 显示文档提示
+		"hints": {
+			"compositeLiteralFields": true, // 结构体字段提示
+			"assignVariableTypes": true, // 变量类型推导
+			"commentTags": true // 启用注释标签提示[8](@ref)
+		}
+	},
+	"editor.codeActionsOnSave": {
+		"source.fixAll": "explicit"
+	}
 }
