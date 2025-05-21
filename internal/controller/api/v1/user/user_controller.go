@@ -4,7 +4,7 @@ import (
 	"log"
 	"rx-mp/internal/biz"
 	"rx-mp/internal/middleware"
-	"rx-mp/internal/models/rd/client"
+	rdClient "rx-mp/internal/models/rd/client"
 	"rx-mp/internal/pkg/auth"
 	"rx-mp/internal/pkg/common"
 	"rx-mp/internal/pkg/mbic"
@@ -37,6 +37,12 @@ type LoginPayload struct {
 	Password string `json:"password" binding:"required,min=8"`
 }
 
+// Login 用户登录接口
+// @title          用户管理系统 API
+// @version        1.0
+// @description    基于 Gin + Gorm 的用户管理接口文档
+// @host      localhost:8080
+// @BasePath  /api/v1
 func Login(c *rx.Context) {
 	var payload LoginPayload
 
@@ -101,6 +107,11 @@ type RegisterPayload struct {
 	Password string `json:"password" binding:"required,min=8"`
 }
 
+// Register 注册用户
+// @Title 创建用户
+// @Description 通过用户信息创建新账户
+// @Router /users [post]
+// @Param user body rdClient.User true "用户对象"
 func Register(c *rx.Context) {
 	var payload RegisterPayload
 
@@ -147,6 +158,14 @@ func Register(c *rx.Context) {
 	c.Ok(user)
 }
 
+// GetUserInfo 获取用户信息
+// @Summary 根据ID查询用户
+// @Description 通过用户ID获取完整用户信息
+// @Tags 用户管理
+// @Accept json
+// @Produce json
+// @Param id path int true "用户ID"
+// @Router /users/{id} [get]
 func GetUserInfo(c *rx.Context) {
 	user, err := mbic.GetMBICUser(c.Context)
 	if err != nil {

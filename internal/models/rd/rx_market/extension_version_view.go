@@ -45,7 +45,7 @@ func (c *ExtensionVersionView) TableName() string {
 	return "rapid.rx_market.extension_version_view"
 }
 
-func (c *ExtensionVersionView) BeforeSave(db *gorm.DB) error {
+func (c *ExtensionVersionView) BeforeSave() error {
 	return errors.New("视图不允许写操作")
 }
 

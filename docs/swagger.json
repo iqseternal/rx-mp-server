@@ -1,0 +1,87 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/users": {
+            "post": {
+                "description": "通过用户信息创建新账户",
+                "parameters": [
+                    {
+                        "description": "用户对象",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rdClient.User"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/users/{id}": {
+            "get": {
+                "description": "通过用户ID获取完整用户信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户管理"
+                ],
+                "summary": "根据ID查询用户",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        }
+    },
+    "definitions": {
+        "rdClient.User": {
+            "type": "object",
+            "properties": {
+                "created_time": {
+                    "description": "创建时间，自动设置，不能为空",
+                    "type": "string"
+                },
+                "email": {
+                    "description": "邮箱唯一，不能为空，最大长度为255",
+                    "type": "string"
+                },
+                "password": {
+                    "description": "密码不能为空，最大长度为255（哈希值）",
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "type": "string"
+                },
+                "updated_time": {
+                    "description": "更新时间，自动更新，不能为空",
+                    "type": "string"
+                },
+                "user_id": {
+                    "description": "主键，自增，不能为空",
+                    "type": "integer"
+                },
+                "username": {
+                    "description": "用户名唯一，不能为空，最大长度为100",
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

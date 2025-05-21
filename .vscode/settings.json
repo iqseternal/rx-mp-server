@@ -11,6 +11,11 @@
         }
     ],
     "go.lintTool": "golangci-lint",
+    "gopls": {
+        "hints": {
+            "commentTags": true // 启用注释标签提示[8](@ref)
+        }
+    },
     "editor.codeActionsOnSave": {
         "source.fixAll": "never"
     }

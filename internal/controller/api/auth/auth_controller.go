@@ -91,7 +91,6 @@ func UpdateAccessToken(r *rx.Context) {
 	// 验证 Refresh Token 有效性
 	claims, err := auth.VerifyRefreshToken(refreshToken)
 	if err != nil {
-
 		fmt.Println(err.Error())
 
 		// 获取到了数据, 但是解析失败了?

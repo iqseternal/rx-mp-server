@@ -1,7 +1,7 @@
-package main
+package cmd
 
 import "rx-mp/internal/app"
 
-func main() {
+func Execute() {
 	app.Run()
 }
