@@ -16,10 +16,12 @@ func RegisterRootController(router *gin.Engine) {
 	router.GET("/api/t", rx.WrapHandler(T))
 }
 
+// Root 根路由
 func Root(c *rx.Context) {
 	c.Redirect(http.StatusMovedPermanently, "http://rapid.oupro.cn")
 }
 
+// T 测试
 func T(c *rx.Context) {
 
 	var extensionVersion rdMarket.ExtensionVersion
