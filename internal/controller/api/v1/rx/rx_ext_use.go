@@ -9,8 +9,8 @@ import (
 )
 
 type UseExtensionQuery struct {
-	ExtensionId   int64  `json:"extension_id" binding:"required,gt=0"`
-	ExtensionUuid string `json:"extension_uuid" binding:"required,uuid"`
+	ExtensionId   int64  `form:"extension_id" binding:"required,gt=0"`
+	ExtensionUuid string `form:"extension_uuid" binding:"required,uuid"`
 }
 
 // UseExtension public: 对接某个扩展
@@ -42,8 +42,8 @@ func UseExtension(c *rx.Context) {
 
 // UseExtensionGroupQuery 定义 UseExtensionGroup 接口的请求参数结构体
 type UseExtensionGroupQuery struct {
-	ExtensionGroupId   int64  `json:"extension_group_id" binding:"required,gt=0"`
-	ExtensionGroupUuid string `json:"extension_group_uuid" binding:"required,uuid"`
+	ExtensionGroupId   int64  `form:"extension_group_id" binding:"required,gt=0"`
+	ExtensionGroupUuid string `form:"extension_group_uuid" binding:"required,uuid"`
 }
 
 // UseExtensionGroup public: 对接某个插件组
