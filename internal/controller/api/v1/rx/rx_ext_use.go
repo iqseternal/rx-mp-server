@@ -8,15 +8,15 @@ import (
 	"rx-mp/internal/pkg/storage"
 )
 
-type UseExtensionPayload struct {
+type UseExtensionQuery struct {
 	ExtensionId   int64  `json:"extension_id" binding:"required,gt=0"`
 	ExtensionUuid string `json:"extension_uuid" binding:"required,uuid"`
 }
 
 // UseExtension public: 对接某个扩展
 func UseExtension(c *rx.Context) {
-	var payload UseExtensionPayload
-	if err := c.ShouldBindJSON(&payload); err != nil {
+	var query UseExtensionQuery
+	if err := c.ShouldBindQuery(&query); err != nil {
 		c.FailWithCodeMessage(biz.ParameterError, err.Error(), nil)
 		return
 	}
@@ -25,8 +25,8 @@ func UseExtension(c *rx.Context) {
 	result := storage.RdPostgres.
 		Model(&rdMarket.Extension{}).
 		Where("COALESCE((status->>'is_deleted')::boolean, false) = ?", false).
-		Where("extension_id = ?", payload.ExtensionId).
-		Where("extension_uuid = ?", payload.ExtensionUuid).
+		Where("extension_id = ?", query.ExtensionId).
+		Where("extension_uuid = ?", query.ExtensionUuid).
 		Where("enabled = ?", 1).
 		Where("use_version != ?", nil).
 		Where("script_hash != ?", nil).
@@ -40,16 +40,16 @@ func UseExtension(c *rx.Context) {
 	c.Ok(extension)
 }
 
-// UseExtensionGroupPayload 定义 UseExtensionGroup 接口的请求参数结构体
-type UseExtensionGroupPayload struct {
+// UseExtensionGroupQuery 定义 UseExtensionGroup 接口的请求参数结构体
+type UseExtensionGroupQuery struct {
 	ExtensionGroupId   int64  `json:"extension_group_id" binding:"required,gt=0"`
 	ExtensionGroupUuid string `json:"extension_group_uuid" binding:"required,uuid"`
 }
 
 // UseExtensionGroup public: 对接某个插件组
 func UseExtensionGroup(c *rx.Context) {
-	var payload UseExtensionGroupPayload
-	if err := c.ShouldBindJSON(&payload); err != nil {
+	var query UseExtensionGroupQuery
+	if err := c.ShouldBindJSON(&query); err != nil {
 		c.FailWithCodeMessage(biz.ParameterError, err.Error(), nil)
 		return
 	}
@@ -58,8 +58,8 @@ func UseExtensionGroup(c *rx.Context) {
 	result := storage.RdPostgres.
 		Model(&rdMarket.ExtensionGroup{}).
 		Where("COALESCE((status->>'is_deleted')::boolean, false) = ?", false).
-		Where("extension_group_id = ?", payload.ExtensionGroupId).
-		Where("extension_group_uuid = ?", payload.ExtensionGroupUuid).
+		Where("extension_group_id = ?", query.ExtensionGroupId).
+		Where("extension_group_uuid = ?", query.ExtensionGroupUuid).
 		Where("enabled = ?", 1).
 		First(&extensionGroup)
 
@@ -73,7 +73,7 @@ func UseExtensionGroup(c *rx.Context) {
 		Model(&rdMarket.Extension{}).
 		Where("COALESCE((status->>'is_deleted')::boolean, false) = ?", false).
 		Where("enabled = ?", 1).
-		Where("extension_group_id = ?", payload.ExtensionGroupId).
+		Where("extension_group_id = ?", query.ExtensionGroupId).
 		Where("use_version is not NULL").
 		Where("script_hash is not NULL").
 		Find(&extensionList)
