@@ -13,6 +13,7 @@ type GetExtensionListQuery struct {
 	ExtensionGroupId *int64 `form:"extension_group_id" binding:"omitempty,gt=0"`
 
 	ExtensionId   *int64  `form:"extension_id" binding:"omitempty,gt=0"`
+	ExtensionUuid *string `form:"extension_uuid" binding:"omitempty"`
 	ExtensionName *string `form:"extension_name" binding:"omitempty"`
 
 	Page     *int `form:"page" binding:"omitempty,gt=0"`
@@ -36,6 +37,10 @@ func GetExtensionList(c *rx.Context) {
 
 	if query.ExtensionId != nil {
 		db = db.Where("extension_id = ?", *query.ExtensionId)
+	}
+
+	if query.ExtensionUuid != nil {
+		db = db.Where("extension_uuid = ?", *query.ExtensionUuid)
 	}
 
 	if query.ExtensionName != nil {

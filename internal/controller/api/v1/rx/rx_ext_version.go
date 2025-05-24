@@ -1,6 +1,8 @@
 package v1RX
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"rx-mp/internal/biz"
 	rdMarket "rx-mp/internal/models/rd/rx_market"
 	"rx-mp/internal/pkg/mbic"
@@ -151,10 +153,11 @@ func ApplyExtensionVersion(c *rx.Context) {
 	}
 
 	var extension rdMarket.Extension
-	extResult := storage.RdPostgres.Model(&rdMarket.Extension{}).
+	extResult := storage.RdPostgres.
+		Model(&rdMarket.Extension{}).
 		Where("extension_id = ?", payload.ExtensionId).
 		Where("extension_uuid = ?", payload.ExtensionUuid).
-		First(extension)
+		First(&extension)
 
 	if extResult.Error != nil {
 		c.FailWithMessage("扩展不存在", nil)
@@ -162,21 +165,25 @@ func ApplyExtensionVersion(c *rx.Context) {
 	}
 
 	var extensionVersion rdMarket.ExtensionVersion
-	extVersionResult := storage.RdPostgres.Model(&rdMarket.ExtensionVersion{}).
+	extVersionResult := storage.RdPostgres.
+		Model(&rdMarket.ExtensionVersion{}).
 		Where("extension_version_id = ?", payload.ExtensionVersionId).
-		First(extensionVersion)
+		First(&extensionVersion)
 
 	if extVersionResult.Error != nil {
 		c.FailWithMessage("扩展版本不存在", nil)
 		return
 	}
 
+	scriptHashX16 := sha256.Sum256([]byte(extensionVersion.ScriptContent))
 	updates := map[string]interface{}{
 		"use_version": extensionVersion.Version,
+		"script_hash": hex.EncodeToString(scriptHashX16[:]),
 		"updater_id":  user.UserID,
 	}
 
-	useVersionResult := storage.RdPostgres.Model(&rdMarket.Extension{}).
+	useVersionResult := storage.RdPostgres.
+		Model(&rdMarket.Extension{}).
 		Where("extension_id = ?", payload.ExtensionId).
 		Where("extension_uuid = ?", payload.ExtensionUuid).
 		Updates(updates)
