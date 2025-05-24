@@ -49,7 +49,7 @@ type UseExtensionGroupQuery struct {
 // UseExtensionGroup public: 对接某个插件组
 func UseExtensionGroup(c *rx.Context) {
 	var query UseExtensionGroupQuery
-	if err := c.ShouldBindJSON(&query); err != nil {
+	if err := c.ShouldBindQuery(&query); err != nil {
 		c.FailWithCodeMessage(biz.ParameterError, err.Error(), nil)
 		return
 	}
