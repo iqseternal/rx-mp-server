@@ -17,6 +17,7 @@ type GetGetExtensionGroupListQuery struct {
 	PageSize *int `form:"page_size" binding:"omitempty,gt=0"`
 }
 
+// GetExtensionGroupList 获取扩展分组
 func GetExtensionGroupList(c *rx.Context) {
 	var query GetGetExtensionGroupListQuery
 	if err := c.ShouldBindQuery(&query); err != nil {
@@ -64,6 +65,7 @@ type AddExtensionGroupPayload struct {
 	Description        *string `json:"description" binding:"omitempty"`
 }
 
+// AddExtensionGroup 添加扩展组
 func AddExtensionGroup(c *rx.Context) {
 	user, err := mbic.GetMBICUser(c.Context)
 	if err != nil {
@@ -105,6 +107,7 @@ type DelExtensionGroupPayload struct {
 	Certificates []DelExtensionGroupCertificate `json:"certificates" binding:"required,gt=0,dive"`
 }
 
+// DelExtensionGroup 删除扩展组
 func DelExtensionGroup(c *rx.Context) {
 	user, err := mbic.GetMBICUser(c.Context)
 	if err != nil {
@@ -157,6 +160,7 @@ type GetExtensionGroupQuery struct {
 	ExtensionGroupUuid *string `form:"extension_group_uuid" binding:"required"`
 }
 
+// GetExtensionGroup 获取扩展组
 func GetExtensionGroup(c *rx.Context) {
 	var query GetExtensionGroupQuery
 	if err := c.ShouldBindQuery(&query); err != nil {

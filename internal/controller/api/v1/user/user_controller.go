@@ -4,7 +4,7 @@ import (
 	"log"
 	"rx-mp/internal/biz"
 	"rx-mp/internal/middleware"
-	"rx-mp/internal/models/rd/client"
+	rdClient "rx-mp/internal/models/rd/client"
 	"rx-mp/internal/pkg/auth"
 	"rx-mp/internal/pkg/common"
 	"rx-mp/internal/pkg/mbic"
@@ -37,6 +37,7 @@ type LoginPayload struct {
 	Password string `json:"password" binding:"required,min=8"`
 }
 
+// Login 用户登录接口
 func Login(c *rx.Context) {
 	var payload LoginPayload
 
@@ -101,6 +102,7 @@ type RegisterPayload struct {
 	Password string `json:"password" binding:"required,min=8"`
 }
 
+// Register 注册用户
 func Register(c *rx.Context) {
 	var payload RegisterPayload
 
@@ -147,6 +149,7 @@ func Register(c *rx.Context) {
 	c.Ok(user)
 }
 
+// GetUserInfo 获取用户信息
 func GetUserInfo(c *rx.Context) {
 	user, err := mbic.GetMBICUser(c.Context)
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 	"testing"
 )
 
+// TestSelectExtension tests the SelectExtension function
 func TestSelectExtension(t *testing.T) {
 	var extension *rdMarket.Extension
 	extResult := storage.RdPostgres.Model(&rdMarket.Extension{}).

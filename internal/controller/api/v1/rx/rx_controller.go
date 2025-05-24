@@ -37,5 +37,6 @@ func RegisterRXController(router *gin.Engine) {
 	{
 		extensionPublicGroup.GET("/api/v1/rx/ext/use", rx.WrapHandler(UseExtension))
 		extensionPublicGroup.GET("/api/v1/rx/ext/use_group", rx.WrapHandler(UseExtensionGroup))
+		extensionPublicGroup.POST("/api/v1/rx/ext/heartbeat", rx.WrapHandler(UseExtensionHeartbeat))
 	}
 }
