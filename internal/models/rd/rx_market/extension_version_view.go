@@ -10,10 +10,16 @@ import (
 // ExtensionVersionView 插件版本视图
 type ExtensionVersionView struct {
 	// 基础版本字段
-	ExtensionVersionId int64  `gorm:"primaryKey;column:extension_version_id;autoIncrement:false"`
-	ScriptContent      string `gorm:"column:script_content;type:text;serializer:compress"`
-	Version            int64  `gorm:"column:version;index:idx_version;comment:'版本号排序使用'"`
-	Description        string `gorm:"column:description;type:varchar(500)"`
+	ExtensionVersionId              int64     `gorm:"primaryKey;column:extension_version_id;autoIncrement:false"`
+	ScriptContent                   string    `gorm:"column:script_content;type:text;"`
+	Version                         int64     `gorm:"column:version;index:idx_version;comment:'版本号排序使用'"`
+	Description                     *string   `gorm:"column:description;type:varchar(500)"`
+	ExtensionVersionCreatedTime     time.Time `gorm:"column:extension_version_created_time;"`
+	ExtensionVersionUpdatedTime     time.Time `gorm:"column:extension_version_updated_time;"`
+	ExtensionVersionCreatorID       *uint64   `gorm:"column:extension_version_creator_id"`
+	ExtensionVersionUpdaterID       *uint64   `gorm:"column:extension_version_updater_id"`
+	ExtensionVersionCreatorUsername *string   `gorm:"->;column:extension_version_creator_username;type:varchar(64)"`
+	ExtensionVersionUpdaterUsername *string   `gorm:"->;column:extension_version_updater_username;type:varchar(64)"`
 
 	// 关联扩展插件
 	ExtensionID   int64       `gorm:"column:extension_id;index:idx_extension"`
@@ -26,19 +32,8 @@ type ExtensionVersionView struct {
 	ExtensionGroupUUID string `gorm:"column:extension_group_uuid;type:uuid"`
 	ExtensionGroupName string `gorm:"column:extension_group_name;type:varchar(255)"`
 
-	// 状态计算字段（只读）
-	EnabledStatus int `gorm:"column:enabled_status;->;comment:'0=禁用,1=启用'"`
-	StatusResult  int `gorm:"column:status_result;->;comment:'0=删除,1=正常'"`
-
-	// 用户关联（指针处理空值）
-	CreatorID       *uint64 `gorm:"column:creator_id"`
-	CreatorUsername string  `gorm:"->;column:creator_username;type:varchar(64)"`
-	UpdaterID       *uint64 `gorm:"column:updater_id"`
-	UpdaterUsername string  `gorm:"->;column:updater_username;type:varchar(64)"`
-
-	// 自动时间戳（与基表同步）
-	CreatedTime time.Time `gorm:"column:created_time;->"`
-	UpdatedTime time.Time `gorm:"column:updated_time;->"`
+	IsEnabled int `gorm:"column:is_enabled;->;comment:'0=禁用,1=启用'"`
+	IsDeleted int `gorm:"column:is_deleted;->;comment:'是否已删除'"`
 }
 
 func (c *ExtensionVersionView) TableName() string {
@@ -53,17 +48,17 @@ func (c *ExtensionVersionView) BeforeSave() error {
 func (c *ExtensionVersionView) CreateView(db *gorm.DB) error {
 	createViewSql := fmt.Sprintf(`
 		CREATE VIEW %s AS (
-			SELECT 
+			SELECT
 				extension_version.extension_version_id,
 				extension_version.script_content,
 				extension_version.version,
 				extension_version.description,
-				extension_version.created_time,
-				extension_version.updated_time,
-				extension_version.creator_id,
-				create_user.username AS creator_username,
-				extension_version.updater_id,
-				update_user.username AS updater_username,
+				extension_version.created_time as extension_version_created_time,
+				extension_version.updated_time as extension_version_updated_time,
+				extension_version.creator_id as extension_version_creator_id,
+				extension_version_create_user.username AS extension_version_creator_username,
+				extension_version.updater_id as extension_version_updater_id,
+				extension_version_update_user.username AS extension_version_updater_username,
 				extension.extension_id,
 				extension.extension_uuid,
 				extension.extension_name,
@@ -75,17 +70,17 @@ func (c *ExtensionVersionView) CreateView(db *gorm.DB) error {
 					WHEN extension_group.enabled = 0 THEN 0
 					WHEN extension.enabled = 0 THEN 0
 					ELSE 1
-				END AS enabled_status,
+				END AS is_enabled,
 				CASE
-					WHEN extension_group.status ? 'is_deleted'::text AND (extension_group.status ->> 'is_deleted'::text) = 'true'::text THEN 0
-					WHEN extension.status ? 'is_deleted'::text AND (extension.status ->> 'is_deleted'::text) = 'true'::text THEN 0
+					WHEN COALESCE((extension_group.status->>'is_deleted')::boolean, false) = false THEN 0
+					WHEN COALESCE((extension.status->>'is_deleted')::boolean, false) = false THEN 0
 					ELSE 1
-				END AS status_result
+				END AS is_deleted
 			FROM rx_market.extension_version
-				LEFT JOIN rx_market.extension ON extension_version.extension_id = extension.extension_id
-				LEFT JOIN rx_market.extension_group ON extension.extension_group_id = extension_group.extension_group_id
-				LEFT JOIN client."user" create_user ON extension_version.creator_id = create_user.user_id
-				LEFT JOIN client."user" update_user ON extension_version.updater_id = update_user.user_id
+			LEFT JOIN rx_market.extension ON extension_version.extension_id = extension.extension_id
+			LEFT JOIN rx_market.extension_group ON extension.extension_group_id = extension_group.extension_group_id
+			LEFT JOIN client."user" extension_version_create_user ON extension_version.creator_id = extension_version_create_user.user_id
+			LEFT JOIN client."user" extension_version_update_user ON extension_version.updater_id = extension_version_update_user.user_id 
 		)		
 	`, c.TableName())
 
