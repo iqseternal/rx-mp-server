@@ -21,15 +21,42 @@ func UseExtension(c *rx.Context) {
 		return
 	}
 
-	var extension rdMarket.Extension
+	type Extension struct {
+		ExtensionID        int64       `json:"extension_id"`
+		ExtensionUuid      string      `json:"extension_uuid"`
+		ExtensionName      string      `json:"extension_name"`
+		Metadata           interface{} `json:"metadata"`
+		UseVersion         *int64      `json:"use_version"`
+		ScriptHash         *string     `json:"script_hash"`
+		ExtensionGroupID   int64       `json:"extension_group_id"`
+		ExtensionGroupUuid string      `json:"extension_group_uuid"`
+		ExtensionGroupName string      `json:"extension_group_name"`
+		ExtensionVersionID int64       `json:"extension_version_id"`
+		ScriptContent      *string     `json:"script_content"`
+		Version            int64       `json:"version"`
+	}
+
+	var extension Extension
 	result := storage.RdPostgres.
-		Model(&rdMarket.Extension{}).
-		Where("COALESCE((status->>'is_deleted')::boolean, false) = ?", false).
+		Model(&rdMarket.ExtensionView{}).
+		Where("is_deleted = ?", 0).
+		Where("is_enabled = ?", 1).
 		Where("extension_id = ?", query.ExtensionId).
 		Where("extension_uuid = ?", query.ExtensionUuid).
-		Where("enabled = ?", 1).
-		Where("use_version != ?", nil).
-		Where("script_hash != ?", nil).
+		Select(
+			"extension_id",
+			"extension_uuid",
+			"extension_name",
+			"metadata",
+			"use_version",
+			"script_hash",
+			"extension_group_id",
+			"extension_group_uuid",
+			"extension_group_name",
+			"extension_version_id",
+			"script_content",
+			"version",
+		).
 		First(&extension)
 
 	if result.Error != nil {
@@ -54,28 +81,42 @@ func UseExtensionGroup(c *rx.Context) {
 		return
 	}
 
-	var extensionGroup rdMarket.ExtensionGroup
-	result := storage.RdPostgres.
-		Model(&rdMarket.ExtensionGroup{}).
-		Where("COALESCE((status->>'is_deleted')::boolean, false) = ?", false).
-		Where("extension_group_id = ?", query.ExtensionGroupId).
-		Where("extension_group_uuid = ?", query.ExtensionGroupUuid).
-		Where("enabled = ?", 1).
-		First(&extensionGroup)
-
-	if result.Error != nil {
-		c.FailWithMessage("插件组不可用", nil)
-		return
+	type Extension struct {
+		ExtensionID        int64       `json:"extension_id"`
+		ExtensionUuid      string      `json:"extension_uuid"`
+		ExtensionName      string      `json:"extension_name"`
+		Metadata           interface{} `json:"metadata"`
+		UseVersion         *int64      `json:"use_version"`
+		ScriptHash         *string     `json:"script_hash"`
+		ExtensionGroupID   int64       `json:"extension_group_id"`
+		ExtensionGroupUuid string      `json:"extension_group_uuid"`
+		ExtensionGroupName string      `json:"extension_group_name"`
+		ExtensionVersionID int64       `json:"extension_version_id"`
+		ScriptContent      *string     `json:"script_content"`
+		Version            int64       `json:"version"`
 	}
 
-	var extensionList []rdMarket.Extension
-	result = storage.RdPostgres.
-		Model(&rdMarket.Extension{}).
-		Where("COALESCE((status->>'is_deleted')::boolean, false) = ?", false).
-		Where("enabled = ?", 1).
+	var extensionList []Extension
+	result := storage.RdPostgres.
+		Model(&rdMarket.ExtensionView{}).
+		Where("is_deleted = ?", 0).
+		Where("is_enabled = ?", 1).
 		Where("extension_group_id = ?", query.ExtensionGroupId).
-		Where("use_version is not NULL").
-		Where("script_hash is not NULL").
+		Where("extension_group_uuid = ?", query.ExtensionGroupUuid).
+		Select(
+			"extension_id",
+			"extension_uuid",
+			"extension_name",
+			"metadata",
+			"use_version",
+			"script_hash",
+			"extension_group_id",
+			"extension_group_uuid",
+			"extension_group_name",
+			"extension_version_id",
+			"script_content",
+			"version",
+		).
 		Find(&extensionList)
 
 	if result.Error != nil {
@@ -124,6 +165,7 @@ func UseExtensionHeartbeat(c *rx.Context) {
 		Model(&rdMarket.Extension{}).
 		Select("extension_id").
 		Where("COALESCE((status->>'is_deleted')::boolean, false) = ?", false).
+		Where("enabled = ?", 1).
 		Where(clause.Or(orConditions...)).
 		Pluck("extension_id", &extensionIDs)
 

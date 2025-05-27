@@ -28,13 +28,14 @@ func init() {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
+
 	if err != nil {
 		panic(err)
 	}
 
 	//refactoring(db)
 
-	RdPostgres = db
+	RdPostgres = db.Debug()
 }
 
 // refactoringTable 重新建立 rapid.client 表结构
@@ -74,6 +75,11 @@ func refactoringTable(db *gorm.DB) error {
 
 func refactoringView(db *gorm.DB) error {
 	return db.Transaction(func(tx *gorm.DB) error {
+
+		// 创建视图 ExtensionView
+		if err := (&rdMarket.ExtensionView{}).CreateView(db); err != nil {
+			return err
+		}
 
 		// 创建视图 ExtensionVersionView
 		if err := (&rdMarket.ExtensionVersionView{}).CreateView(db); err != nil {
