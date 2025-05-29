@@ -135,7 +135,7 @@ type UseExtensionHeartbeatVoucher struct {
 
 // UseExtensionHeartbeatPayload 定义 UseExtensionHeartbeat 接口的请求参数结构体
 type UseExtensionHeartbeatPayload struct {
-	Vouchers []UseExtensionHeartbeatVoucher `json:"vouchers" binding:"required,min=1"`
+	Vouchers []UseExtensionHeartbeatVoucher `json:"vouchers" binding:"required"`
 }
 
 // UseExtensionHeartbeat public: 插件心跳
@@ -158,6 +158,11 @@ func UseExtensionHeartbeat(c *rx.Context) {
 			clause.Eq{Column: "extension_uuid", Value: *voucher.ExtensionUuid},
 			clause.Neq{Column: "script_hash", Value: *voucher.ScriptHash},
 		))
+	}
+
+	if len(orConditions) == 0 {
+		c.Ok(make([]int64, 0))
+		return
 	}
 
 	var extensionIDs []int64
