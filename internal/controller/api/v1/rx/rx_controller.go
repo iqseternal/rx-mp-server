@@ -35,8 +35,8 @@ func RegisterRXController(router *gin.Engine) {
 	extensionPublicGroup := router.Group("")
 	extensionRXOperatorGroup.Use(middleware.ResourceAccessControlMiddleware())
 	{
-		extensionPublicGroup.GET("/api/v1/rx/ext/use", rx.WrapHandler(UseExtension))
-		extensionPublicGroup.GET("/api/v1/rx/ext/use_group", rx.WrapHandler(UseExtensionGroup))
+		extensionPublicGroup.POST("/api/v1/rx/ext/use", rx.WrapHandler(UseExtensions))
+		extensionPublicGroup.POST("/api/v1/rx/ext/use_group", rx.WrapHandler(UseExtensionGroup))
 		extensionPublicGroup.POST("/api/v1/rx/ext/heartbeat", rx.WrapHandler(UseExtensionHeartbeat))
 	}
 }
