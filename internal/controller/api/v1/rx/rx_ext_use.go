@@ -8,15 +8,19 @@ import (
 	"rx-mp/internal/pkg/storage"
 )
 
-type UseExtensionQuery struct {
-	ExtensionId   int64  `form:"extension_id" binding:"required,gt=0"`
-	ExtensionUuid string `form:"extension_uuid" binding:"required,uuid"`
+type UseExtensionVoucher struct {
+	ExtensionId   *int64  `json:"extension_id" binding:"required,gt=0"`
+	ExtensionUuid *string `json:"extension_uuid" binding:"required,uuid"`
 }
 
-// UseExtension public: 对接某个扩展
-func UseExtension(c *rx.Context) {
-	var query UseExtensionQuery
-	if err := c.ShouldBindQuery(&query); err != nil {
+type UseExtensionPayload struct {
+	Vouchers []UseExtensionVoucher `json:"vouchers" binding:"required"`
+}
+
+// UseExtensions public: 对接某个扩展
+func UseExtensions(c *rx.Context) {
+	var payload UseExtensionPayload
+	if err := c.ShouldBindJSON(&payload); err != nil {
 		c.FailWithCodeMessage(biz.ParameterError, err.Error(), nil)
 		return
 	}
@@ -36,13 +40,30 @@ func UseExtension(c *rx.Context) {
 		Version            int64       `json:"version"`
 	}
 
-	var extension Extension
+	var orConditions []clause.Expression
+	for _, voucher := range payload.Vouchers {
+		if voucher.ExtensionId == nil || voucher.ExtensionUuid == nil {
+			c.FailWithCodeMessage(biz.ParameterError, "missing required fields", nil)
+			return
+		}
+
+		orConditions = append(orConditions, clause.And(
+			clause.Eq{Column: "extension_id", Value: *voucher.ExtensionId},
+			clause.Eq{Column: "extension_uuid", Value: *voucher.ExtensionUuid},
+		))
+	}
+
+	if len(orConditions) == 0 {
+		c.Ok(make([]int64, 0))
+		return
+	}
+
+	var extension []Extension
 	result := storage.RdPostgres.
 		Model(&rdMarket.ExtensionView{}).
 		Where("is_deleted = ?", 0).
 		Where("is_enabled = ?", 1).
-		Where("extension_id = ?", query.ExtensionId).
-		Where("extension_uuid = ?", query.ExtensionUuid).
+		Where(clause.Or(orConditions...)).
 		Select(
 			"extension_id",
 			"extension_uuid",
@@ -57,7 +78,7 @@ func UseExtension(c *rx.Context) {
 			"script_content",
 			"version",
 		).
-		First(&extension)
+		Find(&extension)
 
 	if result.Error != nil {
 		c.FailWithMessage("扩展不存在", nil)
@@ -67,16 +88,16 @@ func UseExtension(c *rx.Context) {
 	c.Ok(extension)
 }
 
-// UseExtensionGroupQuery 定义 UseExtensionGroup 接口的请求参数结构体
-type UseExtensionGroupQuery struct {
-	ExtensionGroupId   int64  `form:"extension_group_id" binding:"required,gt=0"`
-	ExtensionGroupUuid string `form:"extension_group_uuid" binding:"required,uuid"`
+// UseExtensionGroupPayload 定义 UseExtensionGroup 接口的请求参数结构体
+type UseExtensionGroupPayload struct {
+	ExtensionGroupId   int64  `json:"extension_group_id" binding:"required,gt=0"`
+	ExtensionGroupUuid string `json:"extension_group_uuid" binding:"required,uuid"`
 }
 
 // UseExtensionGroup public: 对接某个插件组
 func UseExtensionGroup(c *rx.Context) {
-	var query UseExtensionGroupQuery
-	if err := c.ShouldBindQuery(&query); err != nil {
+	var payload UseExtensionGroupPayload
+	if err := c.ShouldBindJSON(&payload); err != nil {
 		c.FailWithCodeMessage(biz.ParameterError, err.Error(), nil)
 		return
 	}
@@ -101,8 +122,8 @@ func UseExtensionGroup(c *rx.Context) {
 		Model(&rdMarket.ExtensionView{}).
 		Where("is_deleted = ?", 0).
 		Where("is_enabled = ?", 1).
-		Where("extension_group_id = ?", query.ExtensionGroupId).
-		Where("extension_group_uuid = ?", query.ExtensionGroupUuid).
+		Where("extension_group_id = ?", payload.ExtensionGroupId).
+		Where("extension_group_uuid = ?", payload.ExtensionGroupUuid).
 		Select(
 			"extension_id",
 			"extension_uuid",
